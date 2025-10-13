@@ -1,2 +1,2 @@
 # Wayback-Public-Library
-School Project CSC 565
+School Project MIS 565
