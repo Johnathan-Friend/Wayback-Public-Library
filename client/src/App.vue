@@ -7,10 +7,12 @@ import { RouterLink, RouterView } from 'vue-router'
     <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
-
-      <nav>
-        <RouterLink to="/">Test Query</RouterLink>
-      </nav>
+      <h1>Group 2 'Hello World' App for Sprint 0</h1>
+      <ul>
+        <li>Vue (Client) Hosted on Firebase</li>
+        <li>Express.JS (Backend & API) & MySQL (Database) Hosted on Digital Ocean</li>
+      </ul>
+      
     </div>
   </header>
 

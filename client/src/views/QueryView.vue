@@ -9,7 +9,6 @@
         try {
             const response = await axios.get('https://fastapi.twnsnd.net/students')
             students.value = response.data
-            console.log(students.value)
         } catch (err) {
             error.value = err.message
             console.error('Error fetching students:', err)
@@ -19,6 +18,8 @@
 
 <template>
   <main>
+    <p>Click this button to query database through: https://fastapi.twnsnd.net/students</p>
+    <p>this returns a list of students from students table</p>
     <button  v-on:click="getData">Click Me to get data</button>
     <div v-if="error">Error: {{ error }}</div>
     <ul v-else>
