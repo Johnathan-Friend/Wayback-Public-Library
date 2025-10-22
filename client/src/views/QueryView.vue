@@ -7,7 +7,7 @@
 
     async function getData() {
         try {
-            const response = await axios.get('https://45.55.93.132:8000/students')
+            const response = await axios.get('https://fastapi.twnsnd.net/students')
             students.value = response.data
             console.log(students.value)
         } catch (err) {
