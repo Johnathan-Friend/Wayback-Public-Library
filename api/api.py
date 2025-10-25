@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from .domains.patron import router as patron_router
+from .domains.patron.router import router as patron_router
 
 # API version 1
 v1_router = APIRouter(prefix="/api/v1")

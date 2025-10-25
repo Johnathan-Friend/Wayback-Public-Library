@@ -1,5 +1,5 @@
 # database.py
-from .config import MYSQL_USER, MYSQL_PASSWORD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB
+from ..core.config import MYSQL_USER, MYSQL_PASSWORD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base

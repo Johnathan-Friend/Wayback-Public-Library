@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import socket
 
-load_dotenv('../.env')
+load_dotenv()
 
 ### DATABASE CONFIGURATION VARIABLES
 MYSQL_HOST = socket.gethostbyname(os.getenv("MYSQL_HOST"))

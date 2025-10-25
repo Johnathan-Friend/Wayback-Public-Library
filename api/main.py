@@ -19,4 +19,4 @@ async def read_root():
     """
     Root endpoint (health check).
     """
-    return {"status": "OK", "message": f"Welcome to {settings.PROJECT_NAME}"}
+    return {"status": "OK", "message": f"Welcome to WPL API v1"}
