@@ -1,13 +1,24 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import QueryView from '@/views/QueryView.vue'
+import CheckIn from "@/views/CheckIn.vue";
+import CheckOut from "@/views/CheckOut.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'query',
-      component: QueryView,
+      name: 'home',
+      component: CheckOut,
+    },
+    {
+      path: '/checkin',
+      name: 'CheckIn',
+      component: CheckIn,
+    },
+    {
+      path: '/checkout',
+      name: 'CheckOut',
+      component: CheckOut,
     },
   ],
 })
