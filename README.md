@@ -11,3 +11,14 @@ School Project MIS 565
 6. make sure you have firebase cli tools installed and run `firebase login`
 7. auth into the firebase and then run `npm run build` to build the application
 8. run `firebase deploy`
+
+##### Components
+
+- CRUD actions table (can add, delete, read, update table information)
+  - https://vuetifyjs.com/en/components/data-tables/basics/#crud-actions
+- Basic table with pagination
+  - https://vuetifyjs.com/en/components/data-tables/basics/#usage
+- Standalone Forms
+  - https://vuetifyjs.com/en/components/forms/#rules
+- Date pickers
+  - https://vuetifyjs.com/en/components/date-pickers/#usage

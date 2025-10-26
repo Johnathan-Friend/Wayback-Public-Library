@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: 'https://fastapi.twnsnd.net/'
+    baseURL: 'https://fastapi.twnsnd.net'
 });
 
 export default api;
