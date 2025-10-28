@@ -3,29 +3,28 @@ from pydantic import BaseModel
 from typing import Optional
 
 
-class ItemDetailBase(BaseModel):
-    ItemID: int
-    ISBN: Optional[str] = None
-    Publisher: Optional[str] = None
-    Language: Optional[str] = None
-    Edition: Optional[str] = None
+class ItemDetailsBase(BaseModel):
+    ItemTypeID: int
+    Title: Optional[str] = None
     Description: Optional[str] = None
+    Rating: Optional[float] = None
+    Quantity: Optional[int] = None
 
 
-class ItemDetailCreate(ItemDetailBase):
+class ItemDetailsCreate(ItemDetailsBase):
     pass
 
 
-class ItemDetailRead(ItemDetailBase):
-    DetailID: int
+class ItemDetailsRead(ItemDetailsBase):
+    ISBN: str
 
     class Config:
         from_attributes = True
 
 
-class ItemDetailUpdate(BaseModel):
-    ISBN: Optional[str] = None
-    Publisher: Optional[str] = None
-    Language: Optional[str] = None
-    Edition: Optional[str] = None
+class ItemDetailsUpdate(BaseModel):
+    ItemTypeID: Optional[int] = None
+    Title: Optional[str] = None
     Description: Optional[str] = None
+    Rating: Optional[float] = None
+    Quantity: Optional[int] = None
