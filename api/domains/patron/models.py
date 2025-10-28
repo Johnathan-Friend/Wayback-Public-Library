@@ -1,0 +1,20 @@
+from typing import Optional
+import datetime
+import decimal
+
+from sqlalchemy import DECIMAL, Date, Integer, String, text
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+class Base(DeclarativeBase):
+    pass
+
+
+class Patron(Base):
+    __tablename__ = 'Patron'
+
+    PatronID: Mapped[int] = mapped_column(Integer, primary_key=True)
+    FirstName: Mapped[str] = mapped_column(String(50), nullable=False)
+    LastName: Mapped[str] = mapped_column(String(50), nullable=False)
+    MembershipExpiration: Mapped[Optional[datetime.date]] = mapped_column(Date)
+    FeeBalance: Mapped[Optional[decimal.Decimal]] = mapped_column(DECIMAL(8, 2), server_default=text("'0.00'"))
+    
