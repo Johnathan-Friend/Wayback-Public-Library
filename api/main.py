@@ -13,16 +13,16 @@ app = FastAPI(
 origins = [
     "http://localhost",
     "http://localhost:8080",
-    "http://localhost:5173/",
+    "http://localhost:5173",
+    "https://library-326c3.web.app/"
     # Add any other origins you might use for development.
     # The "*" wildcard is permissive for local development.
-    "*",
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=False,
+    allow_credentials=True,
     allow_methods=["*"],  # Allows all standard HTTP methods
     allow_headers=["*"],  # Allows all headers
 )
