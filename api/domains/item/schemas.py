@@ -7,12 +7,9 @@ from datetime import date
 
 # 1. Base schema: Common fields
 class ItemBase(BaseModel):
-    Title: str
-    Author: Optional[str] = None
-    ISBN: Optional[str] = None
-    Genre: Optional[str] = None
-    PublishDate: Optional[date] = None
-    CopiesAvailable: int = Field(default=1, ge=0)
+    ISBN: str
+    BranchID: int
+    IsDamaged: Optional[int]
 
 # 2. Create schema: Used for POST
 class ItemCreate(ItemBase):
@@ -28,9 +25,6 @@ class ItemRead(ItemBase):
 
 # 4. Update schema: Used for PATCH
 class ItemUpdate(BaseModel):
-    Title: Optional[str] = None
-    Author: Optional[str] = None
-    ISBN: Optional[str] = None
-    Genre: Optional[str] = None
-    PublishDate: Optional[date] = None
-    CopiesAvailable: Optional[int] = None
+    ISBN: Optional[str]
+    BranchID: Optional[int]
+    IsDamaged: Optional[int]
