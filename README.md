@@ -22,3 +22,10 @@ School Project MIS 565
   - https://vuetifyjs.com/en/components/forms/#rules
 - Date pickers
   - https://vuetifyjs.com/en/components/date-pickers/#usage
+
+##### Best Practices
+
+- use the api/api.js to use axios and make reusable queries
+- only full routes or pages go into the /views directory
+- components that go into views go into the /components directory
+- site wide styling goes into assets/main.css
