@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class ItemAuthorBase(BaseModel):
-    ItemID: int
+    ISBN: str
     AuthorID: int
 
 
@@ -11,7 +11,7 @@ class ItemAuthorCreate(ItemAuthorBase):
 
 
 class ItemAuthorRead(ItemAuthorBase):
-    ItemAuthorID: int
+    AuthorID: int
 
     class Config:
         from_attributes = True

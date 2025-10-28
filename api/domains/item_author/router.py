@@ -31,9 +31,9 @@ def read_item_author(item_author_id: int, db: Session = Depends(get_db)):
     return db_link
 
 
-@router.delete("/{item_author_id}", response_model=schemas.ItemAuthorRead)
-def delete_item_author(item_author_id: int, db: Session = Depends(get_db)):
-    db_link = service.delete_item_author(db, item_author_id)
+@router.delete("/{isbn}/{item_author_id}", response_model=schemas.ItemAuthorRead)
+def delete_item_author(isbn: str, item_author_id: int, db: Session = Depends(get_db)):
+    db_link = service.delete_item_author(db, isbn, item_author_id)
     if db_link is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ItemAuthor link not found")
     return db_link

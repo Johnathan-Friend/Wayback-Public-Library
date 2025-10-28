@@ -4,23 +4,23 @@ from typing import List, Optional
 from . import models, schemas
 
 
-def get_item_detail(db: Session, detail_id: int) -> Optional[models.ItemDetail]:
-    return db.query(models.ItemDetail).filter(models.ItemDetail.DetailID == detail_id).first()
+def get_item_detail(db: Session, detail_id: int) -> Optional[models.ItemDetails]:
+    return db.query(models.ItemDetails).filter(models.ItemDetails.DetailID == detail_id).first()
 
 
-def get_item_details(db: Session, skip: int = 0, limit: int = 100) -> List[models.ItemDetail]:
-    return db.query(models.ItemDetail).offset(skip).limit(limit).all()
+def get_item_details(db: Session, skip: int = 0, limit: int = 100) -> List[models.ItemDetails]:
+    return db.query(models.ItemDetails).offset(skip).limit(limit).all()
 
 
-def create_item_detail(db: Session, detail: schemas.ItemDetailCreate) -> models.ItemDetail:
-    db_detail = models.ItemDetail(**detail.model_dump())
+def create_item_detail(db: Session, detail: schemas.ItemDetailsCreate) -> models.ItemDetails:
+    db_detail = models.ItemDetails(**detail.model_dump())
     db.add(db_detail)
     db.commit()
     db.refresh(db_detail)
     return db_detail
 
 
-def update_item_detail(db: Session, detail_id: int, detail_update: schemas.ItemDetailUpdate) -> Optional[models.ItemDetail]:
+def update_item_detail(db: Session, detail_id: int, detail_update: schemas.ItemDetailsUpdate) -> Optional[models.ItemDetails]:
     db_detail = get_item_detail(db, detail_id)
     if not db_detail:
         return None
@@ -33,7 +33,7 @@ def update_item_detail(db: Session, detail_id: int, detail_update: schemas.ItemD
     return db_detail
 
 
-def delete_item_detail(db: Session, detail_id: int) -> Optional[models.ItemDetail]:
+def delete_item_detail(db: Session, detail_id: int) -> Optional[models.ItemDetails]:
     db_detail = get_item_detail(db, detail_id)
     if not db_detail:
         return None
