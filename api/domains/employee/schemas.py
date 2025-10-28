@@ -5,7 +5,9 @@ from typing import Optional
 class EmployeeBase(BaseModel):
     FirstName: str
     LastName: str
-    BranchID: int
+    BranchID: Optional[int] = None
+    Role: Optional[str] = None
+    Address: Optional[str] = None
 
 
 class EmployeeCreate(EmployeeBase):
@@ -23,3 +25,5 @@ class EmployeeUpdate(BaseModel):
     FirstName: Optional[str] = None
     LastName: Optional[str] = None
     BranchID: Optional[int] = None
+    Role: Optional[str] = None
+    Address: Optional[str] = None
