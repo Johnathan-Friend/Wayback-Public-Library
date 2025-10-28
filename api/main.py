@@ -1,6 +1,7 @@
 # app/main.py
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from .api import api_router
 
 ### TODO: Remove hardcoded values and use settings from config.py
