@@ -21,7 +21,7 @@ def read_item_details(skip: int = 0, limit: int = 100, db: Session = Depends(get
 
 
 @router.get("/{isbn}", response_model=schemas.ItemDetailsRead)
-def read_item_detail(isbn: int, db: Session = Depends(get_db)):
+def read_item_detail(isbn: str, db: Session = Depends(get_db)):
     db_detail = service.get_item_detail(db, isbn)
     if not db_detail:
         raise HTTPException(status_code=404, detail="ISBN not found")

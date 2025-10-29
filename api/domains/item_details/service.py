@@ -4,7 +4,7 @@ from typing import List, Optional
 from . import models, schemas
 
 
-def get_item_detail(db: Session, isbn: int) -> Optional[models.ItemDetails]:
+def get_item_detail(db: Session, isbn: str) -> Optional[models.ItemDetails]:
     return db.query(models.ItemDetails).filter(models.ItemDetails.ISBN == isbn).first()
 
 
