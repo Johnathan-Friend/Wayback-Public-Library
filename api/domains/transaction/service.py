@@ -91,7 +91,7 @@ def checkout_item(db: Session, patron_id: int, item_id: int):
     # Step 4: Determine due date (use ItemType.RentalLength or default 14)
     item_details = item.ItemDetails_
     item_type = item_details.ItemType_ if item_details else None
-    rental_length = getattr(item_type, "RentalLength", 14)
+    rental_length = getattr(item_type, "RentalLength", 28)
 
     # Step 5: Create new transaction
     new_transaction = models.Transactions(
