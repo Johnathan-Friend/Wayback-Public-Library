@@ -24,6 +24,37 @@
   
 </v-row>
 
+
+    <div>
+      <label>Title</label>
+      <input :value="title" disabled />
+    </div>
+
+    <div>
+      <label>Member</label>
+      <input :value="member" disabled />
+    </div>
+
+    <div>
+      <label>Due Date</label>
+      <input :value="dueDateDisplay" disabled />
+    </div>
+
+    <div>
+      <label>Return Date</label>
+      <input :value="returnDateDisplay" disabled />
+    </div>
+
+    <div>
+      <label>Days Late</label>
+      <input :value="daysLateDisplay" disabled />
+    </div>
+
+    <div>
+      <label>Fines</label>
+      <input :value="finesDisplay" disabled />
+    </div>
+
 </template>
 
 <script setup>
@@ -32,8 +63,14 @@ import { ref, onMounted } from 'vue'
 
 const items = ref([]);
 const selectedItemID = ref(null);
-const selectedPatronID = ref(null);
 const itemDetails = ref(null);
+
+const Title = ref(null);
+const Member = ref(null);
+const DueDate = ref(null);
+const ReturnDate = ref(null);
+const DaysLate = ref(null);
+const Fines = ref(null);
 
 async function loadItems() {
   try {
@@ -55,12 +92,8 @@ async function fetchItemDetails() {
 
 onMounted(() => {
   loadItems();
-  loadPatrons();
 });
 
-function selectPatron() {
-  isPatronSelected.value = true;
-}
 </script>
 
 <style scoped>
