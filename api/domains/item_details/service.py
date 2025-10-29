@@ -4,8 +4,8 @@ from typing import List, Optional
 from . import models, schemas
 
 
-def get_item_detail(db: Session, detail_id: int) -> Optional[models.ItemDetails]:
-    return db.query(models.ItemDetails).filter(models.ItemDetails.DetailID == detail_id).first()
+def get_item_detail(db: Session, isbn: str) -> Optional[models.ItemDetails]:
+    return db.query(models.ItemDetails).filter(models.ItemDetails.ISBN == isbn).first()
 
 
 def get_item_details(db: Session, skip: int = 0, limit: int = 100) -> List[models.ItemDetails]:
