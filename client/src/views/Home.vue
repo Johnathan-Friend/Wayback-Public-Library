@@ -17,12 +17,11 @@ function goToCheckOut() {
       <h1 class="mb-6">Wayback Public Library</h1>
 
       <div class="d-flex justify-center gap-4">
-        <v-btn color="primary" @click="goToCheckIn">
-          Check In
-        </v-btn>
-
         <v-btn color="secondary" @click="goToCheckOut">
           Check Out
+        </v-btn>
+        <v-btn color="primary" @click="goToCheckIn">
+          Check In
         </v-btn>
       </div>
     </div>
