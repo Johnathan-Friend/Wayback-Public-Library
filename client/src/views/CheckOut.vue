@@ -19,9 +19,9 @@
       <v-col cols="12" md="5" class="left-panel">
         <v-row class="search">
           <v-autocomplete
-            label="Search Item"
+            label="Search Item ID"
             :items="items"
-            item-title="ItemID" 
+            :item-title="formatItemTitle"
             item-value="ItemID"
             v-model="selectedItemID"
             variant="outlined"
@@ -29,6 +29,12 @@
           />
           <v-btn color="primary" @click="fetchItemDetails()" v-bind:disabled="!selectedItemID">Search Item</v-btn>
         </v-row>
+        <v-card v-if="itemDetails"
+          title="Card title"
+          subtitle="Subtitle"
+          text="..."
+          variant="outlined"
+        ></v-card>
       </v-col>
       <v-col cols="12" md="7" class="right-panel">
         <div class="table-placeholder">
@@ -68,9 +74,9 @@ async function loadPatrons() {
 
 async function fetchItemDetails() {
   if (!selectedItemID.value) return
-  
   try {
-    itemDetails.value = await api.getItemDetails(selectedItemID.value);
+    const selectedItem = items.value.find(item => item.ItemID === selectedItemID.value)
+    itemDetails.value = await api.getItemDetails(selectedItem.ISBN);
   } catch (err) {
     console.error("Failed to load items:", err);
   }
@@ -81,8 +87,12 @@ onMounted(() => {
   loadPatrons();
 });
 
+const formatItemTitle = (item) => {
+  return `${item.ItemID} (${item.ISBN})`;
+}
+
 const formatPatronTitle = (patron) => {
-  return `${patron.FirstName} ${patron.LastName} (${patron.PatronID})`
+  return `${patron.LastName} ${patron.FirstName} (${patron.PatronID})`
 }
 
 function selectPatron() {

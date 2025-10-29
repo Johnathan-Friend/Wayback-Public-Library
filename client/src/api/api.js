@@ -17,9 +17,9 @@ const api = {
         }
     },
 
-    async getItemDetails(itemId) {
+    async getItemDetails(itemDetailsId) {
         try {
-            const response = await apiClient.get(`item-details/${itemId}`);
+            const response = await apiClient.get(`item-details/${itemDetailsId}`);
             return response.data;
         } catch (error) {
             throw error;
@@ -27,12 +27,12 @@ const api = {
     },
 
     async getPatronDetails(patronId) {
-        // try {
-        //     const response = await apiClient.get(`item-details/${itemId}`);
-        //     return response.data;
-        // } catch (error) {
-        //     throw error;
-        // }
+        try {
+            const response = await apiClient.get(`patrons/${patronId}`);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
     },
 
     async getAllPatrons() {
