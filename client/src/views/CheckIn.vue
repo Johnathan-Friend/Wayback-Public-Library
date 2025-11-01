@@ -1,7 +1,3 @@
-<script setup lang="ts">
-
-</script>
-
 <template>
   <h1>Check In</h1>
   <h2>Test</h2>
@@ -17,8 +13,8 @@
             v-model="selectedItemID"
             variant="outlined"
             density="comfortable"
+            @update:modelValue="fetchItemDetails()"
           />
-          <v-btn color="primary" @click="fetchItemDetails()" v-bind:disabled="!selectedItemID">Search Item</v-btn>
       </v-row>
   </v-col>
   
@@ -55,22 +51,36 @@
       <input :value="finesDisplay" disabled />
     </div>
 
+    <div>
+      <v-btn color="primary" @click="confirmCheckIn" class="mr-2">Confirm</v-btn>
+      <v-btn color="secondary" @click="resetFields" class="mr-2">Another Item</v-btn>
+      <v-btn color="black" @click="goToHome" variant="outlined">Finish</v-btn>
+    </div>
+
 </template>
 
 <script setup>
 import api from '../api/api'
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const items = ref([]);
 const selectedItemID = ref(null);
 const itemDetails = ref(null);
 
-const Title = ref(null);
-const Member = ref(null);
-const DueDate = ref(null);
-const ReturnDate = ref(null);
-const DaysLate = ref(null);
-const Fines = ref(null);
+const title = ref(null);
+const member = ref(null);
+const dueDate = ref(null);
+const returnDate = ref(null);
+const daysLate = ref(0);
+const fines = ref(0);
+
+const dueDateDisplay = ref('');
+const returnDateDisplay = ref('');
+const daysLateDisplay = ref(0);
+const finesDisplay = ref('$0.00');
 
 async function loadItems() {
   try {
@@ -81,13 +91,64 @@ async function loadItems() {
 }
 
 async function fetchItemDetails() {
-  if (!selectedItemID.value) return
-  
+  if (!selectedItemID.value) {
+    itemDetails.value = null;
+    title.value = null;
+    returnDate.value = null;
+    returnDateDisplay.value = '';
+    daysLate.value = 0;
+    daysLateDisplay.value = 0;
+    fines.value = 0;
+    finesDisplay.value = '$0.00';
+    return
+  }
   try {
-    itemDetails.value = await api.getItemDetails(selectedItemID.value);
+    const selectedItem = items.value.find(item => item.ItemID === selectedItemID.value);
+    itemDetails.value = await api.getItemDetails(selectedItem.ISBN);
+    title.value = itemDetails.value.Title;
+    
+    const today = new Date();
+    returnDate.value = today;
+    returnDateDisplay.value = today.toLocaleDateString();
+    
+    if (dueDate.value && returnDate.value) {
+      const due = new Date(dueDate.value);
+      const returned = new Date(returnDate.value);
+      const diffTime = returned - due;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      daysLate.value = diffDays > 0 ? diffDays : 0;
+    } else {
+      daysLate.value = 0;
+    }
+    
+    daysLateDisplay.value = daysLate.value;
+    fines.value = daysLate.value * 1;
+    finesDisplay.value = `$${fines.value.toFixed(2)}`;
   } catch (err) {
     console.error("Failed to load items:", err);
   }
+}
+
+function resetFields() {
+  selectedItemID.value = null;
+  itemDetails.value = null;
+  title.value = null;
+  member.value = null;
+  dueDate.value = null;
+  returnDate.value = null;
+  daysLate.value = 0;
+  fines.value = 0;
+  dueDateDisplay.value = '';
+  returnDateDisplay.value = '';
+  daysLateDisplay.value = 0;
+  finesDisplay.value = '$0.00';
+}
+
+async function confirmCheckIn() {
+}
+
+function goToHome() {
+  router.push('/');
 }
 
 onMounted(() => {
