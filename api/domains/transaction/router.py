@@ -1,16 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
+from datetime import date, timedelta
 
 from . import schemas, service
 from ...db.database import get_db
-
+from ...domains.transaction.models import Transactions
+from ...domains.item.models import Item
+from ...domains.patron.models import Patron
 
 router = APIRouter(
     prefix="/transactions",
     tags=["Transactions"]
 )
-
 
 @router.post("/", response_model=schemas.TransactionRead, status_code=status.HTTP_201_CREATED)
 def create_transaction(transaction: schemas.TransactionCreate, db: Session = Depends(get_db)):
@@ -30,9 +32,11 @@ def read_transaction(transaction_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
     return db_transaction
 
+
 @router.get("/patron/{patron_id}", response_model=List[schemas.TransactionRead])
 def read_transactions_for_patron(patron_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return service.get_transactions_for_patron(db, patron_id=patron_id, skip=skip, limit=limit)
+
 
 @router.get("/patron/{patron_id}/count", response_model=int)
 def read_transaction_count_for_patron(patron_id: int, db: Session = Depends(get_db)):
@@ -69,3 +73,6 @@ def handle_item_return(
         raise he
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+@router.post("/check-out-item", status_code=status.HTTP_201_CREATED)
+def check_out_item(patron_id: int, item_id: int, db: Session = Depends(get_db)):
+    return service.checkout_item(db=db, patron_id=patron_id, item_id=item_id)
