@@ -51,6 +51,19 @@ const api = {
         } catch (error) {
             throw error;
         }
+    },
+
+    async checkInItem(patronId, itemId, returnDate) {
+        try {
+            const response = await apiClient.post('transactions/checkin', {
+                patron_id: patronId,
+                item_id: itemId,
+                return_date: returnDate
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
     }
 }
 
