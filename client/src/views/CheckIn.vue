@@ -1,6 +1,5 @@
 <template>
   <h1>Check In</h1>
-  <h2>Test</h2>
 
 <v-row class="h-100">
   <v-col cols="12" md="5" class="left-panel">
