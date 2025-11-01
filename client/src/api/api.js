@@ -10,7 +10,7 @@ const apiClient = axios.create({
 const api = {
     async getAllItems() {
         try {
-            const response = await apiClient.get("items/");
+            const response = await apiClient.get('items/');
             return response.data;
         } catch (error) {
             throw error;
@@ -37,7 +37,16 @@ const api = {
 
     async getAllPatrons() {
         try {
-            const response = await apiClient.get(`patrons/`);
+            const response = await apiClient.get('patrons/');
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async getPatronNumberOfBooksCheckedOut(patronId) {
+        try {
+            const response = await apiClient.get(`transactions/patron/${patronId}/count`);
             return response.data;
         } catch (error) {
             throw error;
