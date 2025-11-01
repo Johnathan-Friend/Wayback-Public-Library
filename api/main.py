@@ -3,6 +3,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .api import api_router
+from fastapi.middleware.cors import CORSMiddleware
+
 
 ### TODO: Remove hardcoded values and use settings from config.py
 app = FastAPI(
