@@ -58,6 +58,21 @@ def delete_transaction(transaction_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
     return db_transaction
 
+@router.post(
+    "/checkin", 
+    response_model=schemas.ItemReturnResponse,
+    summary="Process an Item Return"
+)
+def handle_item_return(
+    return_request: schemas.ItemReturnRequest, 
+    db: Session = Depends(get_db)
+):
+    try:
+        return service.process_item_checkin(db=db, return_request=return_request)
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 @router.post("/check-out-item", status_code=status.HTTP_201_CREATED)
 def check_out_item(patron_id: int, item_id: int, db: Session = Depends(get_db)):
     return service.checkout_item(db=db, patron_id=patron_id, item_id=item_id)
