@@ -1,20 +1,57 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-    baseURL: "https://fastapi.twnsnd.net",
+    baseURL: "https://wayback.twnsnd.net/api/v1/",
     headers: {
         "Content-Type": "application/json",
     },
 });
 
 const api = {
+    async getAllItems() {
+        try {
+            const response = await apiClient.get('items/');
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
 
-    //example
-    // async getUsers() {
-    //     const response = await apiClient.get("/users");
-    //     return response.data;
-    // },
+    async getItemDetails(itemDetailsId) {
+        try {
+            const response = await apiClient.get(`item-details/${itemDetailsId}`);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
 
+    async getPatronDetails(patronId) {
+        try {
+            const response = await apiClient.get(`patrons/${patronId}`);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async getAllPatrons() {
+        try {
+            const response = await apiClient.get('patrons/');
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async getPatronNumberOfBooksCheckedOut(patronId) {
+        try {
+            const response = await apiClient.get(`transactions/patron/${patronId}/count`);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 export default api;
