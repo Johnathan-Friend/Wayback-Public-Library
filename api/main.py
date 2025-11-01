@@ -1,7 +1,10 @@
 # app/main.py
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from .api import api_router
+from fastapi.middleware.cors import CORSMiddleware
+
 
 ### TODO: Remove hardcoded values and use settings from config.py
 app = FastAPI(
@@ -13,10 +16,10 @@ app = FastAPI(
 origins = [
     "http://localhost",
     "http://localhost:8080",
-    "http://localhost:5173/",
+    "http://localhost:5173",
+    "https://library-326c3.web.app"
     # Add any other origins you might use for development.
     # The "*" wildcard is permissive for local development.
-    "*",
 ]
 
 app.add_middleware(
