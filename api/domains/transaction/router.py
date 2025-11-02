@@ -32,6 +32,13 @@ def read_transaction(transaction_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
     return db_transaction
 
+@router.get("/item/{item_id}", response_model=schemas.TransactionRead)
+def read_transaction_for_item(item_id: int, db: Session = Depends(get_db)):
+    db_transaction = service.get_transaction_for_item(db, item_id)
+    if db_transaction is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
+    return db_transaction
+
 
 @router.get("/patron/{patron_id}", response_model=List[schemas.TransactionRead])
 def read_transactions_for_patron(patron_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
