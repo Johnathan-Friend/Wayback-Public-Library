@@ -8,6 +8,8 @@ const apiClient = axios.create({
 });
 
 const api = {
+
+    //GET requests
     async getAllItems() {
         try {
             const response = await apiClient.get('items/');
@@ -49,6 +51,37 @@ const api = {
             const response = await apiClient.get(`transactions/patron/${patronId}/count`);
             return response.data;
         } catch (error) {
+            throw error;
+        }
+    },
+
+    //POST requests
+    async checkOutItem(patronID, itemID) {
+        try {
+            const response = await apiClient.post('transactions/check-out-item', {}, { 
+                params: {
+                    patron_id: patronID,
+                    item_id: itemID
+                }
+            });
+            return { data: response.data, status: 200 };
+        } catch (error) {
+            if (error.status === 400 && error.response?.data?.detail) {
+                return { data: error.response?.data?.detail, status: 400 };
+            }
+            throw error;
+        }
+    },
+
+    //DELETE requests
+    async deleteTransaction(transactionID) {
+        try {
+            const response = await apiClient.delete(`transactions/${transactionID}`);
+            return { data: response.data, status: 200 };
+        } catch (error) {
+            if (error.status === 400 && error.response?.data?.detail) {
+                return { data: error.response?.data?.detail, status: 400 };
+            }
             throw error;
         }
     }
