@@ -127,6 +127,38 @@ async function fetchItemDetails() {
     itemDetails.value = await api.getItemDetails(selectedItem.ISBN);
     title.value = itemDetails.value.Title;
     
+    /*
+    //fake api call
+    const transaction = await api.getTransactionByItemId(selectedItemID.value);
+    if (transaction) {
+      if (transaction.PatronID) {
+        patronID.value = transaction.PatronID;
+      } else {
+        patronID.value = null;
+      }
+
+
+      if (transaction.DueDate) {
+        const parsedDue = new Date(transaction.DueDate);
+        if (!isNaN(parsedDue.getTime())) {
+          dueDate.value = parsedDue;
+          dueDateDisplay.value = parsedDue.toLocaleDateString();
+        } else {
+          dueDate.value = null;
+          dueDateDisplay.value = '';
+        }
+      } else {
+        dueDate.value = null;
+        dueDateDisplay.value = '';
+      }
+    } else {
+    
+      patronID.value = null;
+      member.value = null;
+      dueDate.value = null;
+      dueDateDisplay.value = '';
+    }
+    */
     const today = new Date();
     returnDate.value = today;
     returnDateDisplay.value = today.toLocaleDateString();
@@ -182,6 +214,14 @@ async function confirmCheckIn() {
     successMessage.value = `Successfully returned: ${title.value} for ${response.PatronName}`;
     errorMessage.value = '';
     
+    /*
+    try {
+      //real api but no way to actually get patron ID as of now
+      await api.updatePatronFee(patronID.value, Number(fines.value));
+    } catch (e) {
+      console.error('Failed to apply patron fine:', e);
+    } */
+
     setTimeout(() => {
       resetFields();
     }, 3000);

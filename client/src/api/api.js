@@ -64,6 +64,18 @@ const api = {
         } catch (error) {
             throw error;
         }
+    },
+
+    async updatePatronFee(patronId, newFee) {
+        try {
+            const response = await apiClient.put(`patrons/${patronId}`, {
+                fee: newFee
+            });
+            return response.data;
+        }
+        catch (error) {
+            throw error;
+        }
     }
 }
 
