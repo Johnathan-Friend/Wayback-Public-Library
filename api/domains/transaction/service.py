@@ -20,11 +20,11 @@ def get_transactions(db: Session, skip: int = 0, limit: int = 100) -> List[model
     return db.query(models.Transactions).offset(skip).limit(limit).all()
 
 
-def get_transactions_for_patron(db: Session, patron_id: int, skip: int = 0, limit: int = 100) -> List[models.Transactions]:
+def get_transactions_for_patron(db: Session, patron_id: int, skip: int = 0, limit: int = 100) -> List[schemas.PatronTransactions]:
     result = db.execute(text("CALL sp_PatronCurrentCheckedOutItems(:patron_id)"), {"patron_id": patron_id})
     data = result.mappings().all()
     db.commit()
-    transactions = [models.Transactions(**row) for row in data]
+    transactions = [schemas.PatronTransactions(**row) for row in data]
     return transactions
 
 

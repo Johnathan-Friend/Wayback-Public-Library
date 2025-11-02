@@ -24,6 +24,18 @@ class TransactionRead(TransactionBase):
     class Config:
         from_attributes = True
 
+class PatronTransactions(BaseModel):
+    TransactionID: int
+    PatronID: int
+    ItemID: int
+    DateStart: date
+    DateDue: date
+    DateReturned: Optional[date]
+    ReturnedBranchID: Optional[int]
+    ISBN: str
+    Title: str
+    Description: Optional[str]
+    TypeName: str
 
 class TransactionUpdate(BaseModel):
     ItemID: Optional[int] = None
