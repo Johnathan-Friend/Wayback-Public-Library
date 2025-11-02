@@ -76,6 +76,15 @@ const api = {
         catch (error) {
             throw error;
         }
+    },
+    
+    async getTransactionByItemId(itemId) {
+        try {
+            const response = await apiClient.get(`transactions/item/${itemId}`);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
     }
 }
 
