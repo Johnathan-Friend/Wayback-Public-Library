@@ -83,12 +83,6 @@ const api = {
             const response = await apiClient.get(`transactions/item/${itemId}`);
             return response.data;
         } catch (error) {
-
-    async getPatronNumberOfBooksCheckedOut(patronId) {
-        try {
-            const response = await apiClient.get(`transactions/patron/${patronId}/count`);
-            return response.data;
-        } catch (error) {
             throw error;
         }
     },
