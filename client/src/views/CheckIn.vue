@@ -133,13 +133,15 @@ async function fetchItemDetails() {
     if (transaction) {
       if (transaction.PatronID) {
         patronID.value = transaction.PatronID;
+        member.value = String(transaction.PatronID);
       } else {
         patronID.value = null;
+        member.value = null;
       }
 
 
-      if (transaction.DueDate) {
-        const parsedDue = new Date(transaction.DueDate);
+      if (transaction.DateDue) {
+        const parsedDue = new Date(transaction.DateDue);
         if (!isNaN(parsedDue.getTime())) {
           dueDate.value = parsedDue;
           dueDateDisplay.value = parsedDue.toLocaleDateString();
