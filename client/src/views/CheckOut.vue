@@ -84,7 +84,7 @@
       justify="center"
       v-else
     >
-      <v-col cols="12" md="6" lg="5">
+      <v-col cols="12" md="4" lg="5">
         <div>
           <h1 class="pb-5">Item Lookup</h1>
         </div>
@@ -98,6 +98,14 @@
           density="comfortable"
           @update:modelValue="fetchItemDetails()"
         />
+        <v-alert
+          v-if="transactionError"
+          type="warning"
+          :text="transactionError"
+          variant="elevated"
+          title="Error Processing Transaction"
+        >
+        </v-alert>
         <v-card
           class="pa-4 mt-4"
           variant="outlined"
@@ -136,13 +144,34 @@
           </v-card-actions>
         </v-card>
       </v-col>
-      <v-col cols="12" md="6" lg="5">
+      <v-col cols="12" md="8" lg="5">
+      <v-alert
+        v-if="transactionTableError"
+        type="error"
+        :text="transactionTableError"
+        variant="elevated"
+        title="Error"
+      >
+      </v-alert>
+      <!-- transaction table -->
       <v-data-table
-          :items="checkedOutItems"
-          hide-default-footer
-          class="elevation-1"
-          dense
-        >
+        :headers="transactionTableHeaders"
+        :items="transactions"
+        item-value="transaction_id"
+        hide-default-footer
+        class="elevation-1"
+        dense
+      > 
+        <!-- delete button -->
+        <template #item.actions="{ item }">
+          <v-btn
+            :icon="mdiDelete"
+            color="red"
+            variant="text"
+            @click="deleteTransaction(item)"
+          ></v-btn>
+        </template>
+        <!-- shown if no data in table -->
         <template #no-data>
           <p class="text-center">No items selected yet.</p>
         </template>
@@ -150,9 +179,9 @@
     </v-col>
     <div class="mt-10 d-flex">
       <v-btn color="green" variant="elevated" class="mr-4" @click="completeTransaction">
-        Complete Transaction
+        Complete Scanning
       </v-btn>
-      <v-btn color="black" variant="outlined" @click="togglePatron">
+      <v-btn color="black" variant="outlined" @click="togglePatron" :disabled="transactions.length > 0">
         Go Back
       </v-btn>
     </div>
@@ -161,10 +190,10 @@
   <v-dialog v-model="showConfirmDialog" max-width="600" persistent>
     <v-card class="pa-6">
       <v-card-title class="text-h6">
-        <b>Confirm Transaction</b>
+        <b>Return to Menu</b>
       </v-card-title>
       <v-card-text>
-        You are about to check out
+        You have checked out
         <strong>{{ checkedOutItems.length }}</strong>
         {{ checkedOutItems.length === 1 ? 'item' : 'items' }} for member {{ patronDetails.FirstName }} {{ patronDetails.LastName }} (ID: {{ patronDetails.PatronID }}).
         Are you sure you want to continue?
@@ -185,7 +214,7 @@
 import api from '../api/api'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router';
-import { mdiCheck } from '@mdi/js'
+import { mdiCheck, mdiDelete } from '@mdi/js'
 
 const router = useRouter();
 
@@ -204,6 +233,13 @@ const emptyPatronState = {
   FeeBalance: "",
   ItemsCheckedOut: ""
 };
+const transactionTableHeaders = [
+  { title: 'Transaction ID', key: 'transaction_id' },
+  { title: 'Patron ID', key: 'patron_id' },
+  { title: 'Item ID', key: 'item_id' },
+  { title: 'Due Date', key: 'date_due' },
+  { title: 'Actions', key: 'actions', sortable: false }
+];
 const maximumNumberOfItemsCheckoutAtOnce = 20;
 
 const isPatronSelected = ref(false);
@@ -219,7 +255,10 @@ const patronCanCheckoutItems = ref(false);
 const checkedOutItems = ref([]);
 const numberOfItemsAvailableToCheckout = ref(0);
 const patronSelectionError = ref(null);
+const transactionError = ref(null);
 const showConfirmDialog = ref(false);
+const transactions = ref([]);
+const transactionTableError = ref(null);
 
 onMounted(() => {
   loadItems();
@@ -246,12 +285,14 @@ async function fetchItemDetails() {
   if (!selectedItemID.value) {
     itemDetails.value = emptyItemDetailState;
     hasItemSelected.value = false;
+    transactionError.value = null;
     return
   }
   try {
     const selectedItem = items.value.find(item => item.ItemID === selectedItemID.value);
     itemDetails.value = await api.getItemDetails(selectedItem.ISBN);
     hasItemSelected.value = true;
+    transactionError.value = null;
   } catch (err) {
     console.error("Failed to load items:", err);
   }
@@ -270,6 +311,30 @@ async function fetchPatronDetails() {
     hasPatronSelected.value = true;
   } catch (error) {
     console.error("Failed to load Patrons:", err);
+  }
+}
+
+async function createTransaction() {
+  try {
+    if (numberOfItemsAvailableToCheckout.value <= 0) {
+      return { success: false, transactionDetails: "This member has the maximum number of items checked out currently, so the system cannot process this transaction."};
+    }
+    if (checkedOutItems.value.includes(selectedItemID.value)) {
+      return { success: false, transactionDetails: "This item has already had a transaction created, please scan another item"};
+    }
+
+    const transactionDetails = await api.checkOutItem(patronDetails.value.PatronID, selectedItemID.value);
+    if (transactionDetails.status === 200) {
+      return { success: true, transactionDetails: transactionDetails};
+    } 
+    else if (transactionDetails.status === 400) {
+      return { success: false, transactionDetails: transactionDetails.data};
+    } 
+    else {
+      return { success: false, transactionDetails: 'error occurred while processing transaction'};
+    }
+  } catch(error) {
+    console.error('ERROR: processing transaction request: ', error);
   }
 }
 
@@ -311,17 +376,50 @@ function togglePatron() {
   hasItemSelected.value = false;
   checkedOutItems.value = [];
   isPatronSelected.value = !isPatronSelected.value;
+  clearErrorStates();
+}
+
+function clearErrorStates() {
+  patronSelectionError.value = null;
+  transactionTableError.value = null;
+  transactionError.value = null;
 }
 
 function goBack() {
   router.push('/');
 }
 
-function checkOutItem() {
+async function checkOutItem() {
   if (hasItemSelected.value) {
-    checkedOutItems.value.push({ ...itemDetails.value });
-    selectedItemID.value = null;
-    hasItemSelected.value = false;
+    const details = await createTransaction();
+    if (details.success) {
+      checkedOutItems.value.push(selectedItemID.value);
+      transactions.value.push({ ...details.transactionDetails.data });
+      selectedItemID.value = null;
+      hasItemSelected.value = false;
+    }
+    else {
+      transactionError.value = details.transactionDetails
+    }
+  }
+}
+
+async function deleteTransaction(transaction) {
+  try {
+    const response = await api.deleteTransaction(transaction.transaction_id);
+    if (response.status === 200) {
+      transactions.value = transactions.value.filter(
+        (t) => t.transaction_id !== transaction.transaction_id
+      );
+      checkedOutItems.value = checkedOutItems.value.filter(
+        (i) => i !== transaction.item_id
+      )
+      return;
+    }
+    throw new Error('error occurred');
+  } catch(error) {
+    transactionTableError.value = `Error trying to delete transaction: ${transaction.transaction_id}`;
+    console.error(response);
   }
 }
 
@@ -377,10 +475,7 @@ function cancelTransaction() {
 <!-- 
 TODO:
 
-- need to implement api to create transaction when added to table and show transaction details
-- need to limit number of items to be added to transaction list based on total number of books currently checked out by user
+Sprint 2:
 - need to only show items that are available for checkout (items not destoryed or currently checked out)
-- replace table data showing item details to show transaction once created
-- add delete button on table to delete transaction or essentially (check in) the item
-- (optionally) add some styling because it looks booty rn
+- need to create a edit membership component to handle membership paying fees + renew membership
 -->
