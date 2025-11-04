@@ -19,12 +19,15 @@ def get_transaction(db: Session, transaction_id: int) -> Optional[models.Transac
 def get_transactions(db: Session, skip: int = 0, limit: int = 100) -> List[models.Transactions]:
     return db.query(models.Transactions).offset(skip).limit(limit).all()
 
+def get_transaction_for_item(db: Session, item_id: int) -> Optional[models.Transactions]:
+    return db.query(models.Transactions).filter(models.Transactions.ItemID == item_id).first()
 
-def get_transactions_for_patron(db: Session, patron_id: int, skip: int = 0, limit: int = 100) -> List[models.Transactions]:
+
+def get_transactions_for_patron(db: Session, patron_id: int, skip: int = 0, limit: int = 100) -> List[schemas.PatronTransactions]:
     result = db.execute(text("CALL sp_PatronCurrentCheckedOutItems(:patron_id)"), {"patron_id": patron_id})
     data = result.mappings().all()
     db.commit()
-    transactions = [models.Transactions(**row) for row in data]
+    transactions = [schemas.PatronTransactions(**row) for row in data]
     return transactions
 
 

@@ -8,8 +8,6 @@ const apiClient = axios.create({
 });
 
 const api = {
-
-    //GET requests
     async getAllItems() {
         try {
             const response = await apiClient.get('items/');
@@ -49,6 +47,40 @@ const api = {
     async getPatronNumberOfBooksCheckedOut(patronId) {
         try {
             const response = await apiClient.get(`transactions/patron/${patronId}/count`);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async checkInItem(patronId, itemId, returnDate) {
+        try {
+            const response = await apiClient.post('transactions/checkin', {
+                patron_id: patronId,
+                item_id: itemId,
+                return_date: returnDate
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async updatePatronFee(patronId, newFee) {
+        try {
+            const response = await apiClient.put(`patrons/${patronId}`, {
+                fee: newFee
+            });
+            return response.data;
+        }
+        catch (error) {
+            throw error;
+        }
+    },
+    
+    async getTransactionByItemId(itemId) {
+        try {
+            const response = await apiClient.get(`transactions/item/${itemId}`);
             return response.data;
         } catch (error) {
             throw error;

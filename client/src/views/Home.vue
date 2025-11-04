@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router'
 import { mdiBookOpenPageVariant } from '@mdi/js'
 
-const router = useRouter();
+const router = useRouter()
 
 function goToCheckIn() {
   router.push('/checkin')
