@@ -229,12 +229,22 @@ function cancelNewPatron() {
 async function renewMembership() {
   if (!hasPatronSelected.value) return
   
-  const today = new Date()
-  const oneYearFromToday = new Date(today)
-  oneYearFromToday.setFullYear(today.getFullYear() + 1)
-  
-  const expirationDate = oneYearFromToday.toISOString().split('T')[0]
-  
+  let base_date = new Date()
+  if (patronDetails.value.MembershipExpiration) {
+    const old_date = new Date(patronDetails.value.MembershipExpiration)
+    if (!isNaN(old_date.getTime()) && old_date > base_date) {
+      base_date = old_date
+    }
+  }
+
+  // New expiration = +1 year from base if base date is greater than today
+  const new_exp = new Date(base_date)
+  new_exp.setFullYear(base_date.getFullYear() + 1)
+  const expirationDate = new_exp.toISOString().split('T')[0]
+  // this could be ommited completely.
+  const ok = window.confirm(`Renew membership until ${expirationDate}?`)
+  if (!ok) return
+
   try {
     await api.updatePatron(selectedPatronID.value, {
       MembershipExpiration: expirationDate
