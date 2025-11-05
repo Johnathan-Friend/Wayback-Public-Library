@@ -1,5 +1,7 @@
 import axios from "axios";
 
+// please add api's in their section labled by the comment above (GET, POST, PUT, DELETE, etc.)
+
 const apiClient = axios.create({
     baseURL: "https://wayback.twnsnd.net/api/v1/",
     headers: {
@@ -7,6 +9,7 @@ const apiClient = axios.create({
     },
 });
 
+//GET requests
 const api = {
     async getAllItems() {
         try {
@@ -101,6 +104,44 @@ const api = {
             if (error.status === 400 && error.response?.data?.detail) {
                 return { data: error.response?.data?.detail, status: 400 };
             }
+            throw error;
+        }
+    },
+
+    async checkInItem(patronId, itemId, returnDate) {
+        try {
+            const response = await apiClient.post('transactions/checkin', {
+                patron_id: patronId,
+                item_id: itemId,
+                return_date: returnDate
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    //PATCH requests
+    async updatePatronFee(patronId, newFee) {
+        try {
+            const response = await apiClient.patch(`patrons/${patronId}`, {
+                 FeeBalance: newFee
+            });
+            return response.data;
+        }
+        catch (error) {
+            throw error;
+        }
+    },
+
+    async extendMembership(patronId, newMembershipExpirationDate) {
+        try {
+            const response = await apiClient.patch(`patrons/${patronId}`, {
+                MembershipExpiration: newMembershipExpirationDate
+            });
+            return response.data;
+        }
+        catch (error) {
             throw error;
         }
     },
