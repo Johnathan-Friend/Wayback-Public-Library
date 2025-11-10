@@ -10,6 +10,7 @@ from .domains.author.router import router as author_router
 from .domains.item_author.router import router as item_author_router
 from .domains.item_type.router import router as itemtype_router
 from .domains.item_details.router import router as item_detail_router
+from .domains.reservation.router import router as reservation_router
 
 
 
@@ -26,6 +27,7 @@ v1_router.include_router(author_router)
 v1_router.include_router(item_author_router)
 v1_router.include_router(itemtype_router)
 v1_router.include_router(item_detail_router)
+v1_router.include_router(reservation_router)
 
 
 # Main router for the API
