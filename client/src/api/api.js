@@ -157,6 +157,37 @@ const api = {
             }
             throw error;
         }
+    },
+
+    // Patron management
+    async createPatron(firstName, lastName) {
+        try {
+            const response = await apiClient.post('patrons/', {
+                FirstName: firstName,
+                LastName: lastName
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async updatePatron(patronId, updateData) {
+        try {
+            const response = await apiClient.patch(`patrons/${patronId}`, updateData);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async deletePatron(patronId) {
+        try {
+            const response = await apiClient.delete(`patrons/${patronId}`);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
     }
 }
 

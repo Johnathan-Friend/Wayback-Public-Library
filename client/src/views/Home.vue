@@ -11,6 +11,10 @@ function goToCheckIn() {
 function goToCheckOut() {
   router.push('/checkout')
 }
+
+function goToPatronMembership() {
+  router.push('/patron-membership')
+}
 </script>
 
 <template>
@@ -20,7 +24,7 @@ function goToCheckOut() {
   >
     <v-card
       class="pa-10 text-center elevation-3"
-      width="400"
+      width="600"
       rounded="xl"
     >
       <v-icon :icon="mdiBookOpenPageVariant" size="72" color="primary" class="mb-6"/>
@@ -43,6 +47,15 @@ function goToCheckOut() {
           @click="goToCheckIn"
         >
           Check In
+        </v-btn>
+        <v-btn
+          color="primary"
+          variant="elevated"
+          size="large"
+          class="text-white"
+          @click="goToPatronMembership"
+        >
+          Patron Membership
         </v-btn>
       </div>
     </v-card>
