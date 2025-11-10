@@ -15,6 +15,10 @@ function goToCheckOut() {
 function goToPatronMembership() {
   router.push('/patron-membership')
 }
+
+function goToReservations() {
+  router.push('/reservations')
+}
 </script>
 
 <template>
@@ -56,6 +60,15 @@ function goToPatronMembership() {
           @click="goToPatronMembership"
         >
           Patron Membership
+        </v-btn>
+        <v-btn
+          color="primary"
+          variant="elevated"
+          size="large"
+          class="text-white"
+          @click="goToReservations"
+        >
+          Reservations
         </v-btn>
       </div>
     </v-card>
