@@ -79,7 +79,10 @@ import api from '../api/api'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
-const router = useRouter()
+const router = useRouter();
+const props = defineProps({
+  branchID: String
+});
 
 const items = ref([]);
 const selectedItemID = ref(null);
@@ -92,13 +95,13 @@ const dueDate = ref(null);
 const returnDate = ref(null);
 const daysLate = ref(0);
 const fines = ref(0);
-
 const dueDateDisplay = ref('');
 const returnDateDisplay = ref('');
 const daysLateDisplay = ref(0);
 const finesDisplay = ref('$0.00');
 const successMessage = ref('');
 const errorMessage = ref('');
+const currentBranch = ref(null);
 
 async function loadItems() {
   try {
@@ -238,6 +241,7 @@ function goToHome() {
 
 onMounted(() => {
   loadItems();
+  currentBranch.value = props.branchID;
 });
 
 </script>

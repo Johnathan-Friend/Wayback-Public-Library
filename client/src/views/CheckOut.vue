@@ -239,6 +239,9 @@ import { useRouter } from 'vue-router';
 import { mdiCheck, mdiDelete } from '@mdi/js'
 
 const router = useRouter();
+const props = defineProps({
+  branchID: String
+});
 
 const emptyItemDetailState = {
   Description: "",
@@ -283,10 +286,12 @@ const transactions = ref([]);
 const transactionTableError = ref(null);
 const showExtendMembership = ref(false);
 const showPayFeeBalance = ref(false);
+const currentBranch = ref(null);
 
 onMounted(() => {
   loadItems();
   loadPatrons();
+  currentBranch.value = props.branchID;
 });
 
 async function loadItems() {
@@ -466,9 +471,10 @@ async function payFeeBalance() {
 
 async function extendMembership() {
   try {
-    const membershipExpiration = new Date(patronDetails.value.MembershipExpiration);
-    const newExpirationDate = membershipExpiration.setFullYear(membershipExpiration.getFullYear() + 1);
-    patronDetails.value = await api.extendMembership(patronDetails.value.PatronID, newExpirationDate);
+    const membershipExpiration = new Date();
+    membershipExpiration.setFullYear(membershipExpiration.getFullYear() + 2);
+    const formattedDate = membershipExpiration.toISOString().split('T')[0];
+    patronDetails.value = await api.extendMembership(patronDetails.value.PatronID, formattedDate);
     checkPatronCheckoutStatus();
   } catch(error) {
     console.error(error);

@@ -12,14 +12,16 @@ const router = createRouter({
       component: Home,
     },
     {
-      path: '/checkin',
+      path: '/checkin/:branchID',
       name: 'CheckIn',
       component: CheckIn,
+      props: true
     },
     {
-      path: '/checkout',
+      path: '/checkout/:branchID',
       name: 'CheckOut',
       component: CheckOut,
+      props: true
     },
   ],
 })

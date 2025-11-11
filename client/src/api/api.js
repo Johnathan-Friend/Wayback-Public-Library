@@ -90,6 +90,15 @@ const api = {
         }
     },
 
+    async getBranches() {
+        try {
+            const response = await apiClient.get('branches/');
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
     //POST requests
     async checkOutItem(patronID, itemID) {
         try {

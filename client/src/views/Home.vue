@@ -1,15 +1,31 @@
 <script setup lang="ts">
+import api from '../api/api'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { mdiBookOpenPageVariant } from '@mdi/js'
 
-const router = useRouter()
+const router = useRouter();
+const selectedBranch = ref(null);
+const branchData = ref([]);
+
+onMounted(() => {
+  loadBranches();
+});
 
 function goToCheckIn() {
-  router.push('/checkin')
+  router.push({name: 'CheckIn', params: { branchID: selectedBranch.value } });
 }
 
 function goToCheckOut() {
-  router.push('/checkout')
+  router.push({name: 'CheckOut', params: { branchID: selectedBranch.value } });
+}
+
+async function loadBranches() {
+  try {
+    branchData.value = await api.getBranches();
+  } catch (error) {
+    console.error(error);
+  }
 }
 </script>
 
@@ -25,6 +41,14 @@ function goToCheckOut() {
     >
       <v-icon :icon="mdiBookOpenPageVariant" size="72" color="primary" class="mb-6"/>
       <h1 class="mb-8 library-title">Wayback Public Library</h1>
+      <v-select
+        label="Select Branch"
+        :items="branchData"
+        item-title="Address"
+        item-value="BranchID"
+        variant="outlined"
+        v-model="selectedBranch"
+      ></v-select>
       <div class="d-flex justify-center gap-4">
         <v-btn
           color="secondary"
@@ -32,6 +56,7 @@ function goToCheckOut() {
           size="large"
           class="text-white"
           @click="goToCheckOut"
+          :disabled="!selectedBranch"
         >
           Check Out
         </v-btn>
@@ -41,6 +66,7 @@ function goToCheckOut() {
           size="large"
           class="text-white"
           @click="goToCheckIn"
+          :disabled="!selectedBranch"
         >
           Check In
         </v-btn>
