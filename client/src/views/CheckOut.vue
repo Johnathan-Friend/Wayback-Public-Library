@@ -456,7 +456,6 @@ async function deleteTransaction(transaction) {
 
 async function payFeeBalance() {
   try {
-    console.log(patronDetails.value);
     patronDetails.value = await api.updatePatronFee(patronDetails.value.PatronID, "0");
     checkPatronCheckoutStatus();
   } catch(error) {
