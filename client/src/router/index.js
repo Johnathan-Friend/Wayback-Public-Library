@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import CheckIn from "@/views/CheckIn.vue";
-import CheckOut from "@/views/CheckOut.vue";
-import Home from "@/views/Home.vue";
+import CheckIn from '@/views/CheckIn.vue'
+import CheckOut from '@/views/CheckOut.vue'
+import Home from '@/views/Home.vue'
+import Reshelve from '@/views/Reshelve.vue'
 import PatronMembership from "@/views/PatronMembership.vue";
 
 const router = createRouter({
@@ -26,6 +27,11 @@ const router = createRouter({
       path: '/patron-membership',
       name: 'PatronMembership',
       component: PatronMembership,
+    },
+    {
+      path: '/reshelve',
+      name: 'Reshelve',
+      component: Reshelve,
     },
   ],
 })

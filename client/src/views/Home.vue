@@ -2,18 +2,22 @@
 import { useRouter } from 'vue-router'
 import { mdiBookOpenPageVariant } from '@mdi/js'
 
-const router = useRouter()
+const router = useRouter();
 
 function goToCheckIn() {
-  router.push('/checkin')
+  router.push('/checkin');
 }
 
 function goToCheckOut() {
-  router.push('/checkout')
+  router.push('/checkout');
 }
 
 function goToPatronMembership() {
-  router.push('/patron-membership')
+  router.push('/patron-membership');
+}
+
+function goToReshelve() {
+  router.push('/reshelve');
 }
 </script>
 
@@ -24,7 +28,7 @@ function goToPatronMembership() {
   >
     <v-card
       class="pa-10 text-center elevation-3"
-      width="600"
+      width="800"
       rounded="xl"
     >
       <v-icon :icon="mdiBookOpenPageVariant" size="72" color="primary" class="mb-6"/>
@@ -47,6 +51,24 @@ function goToPatronMembership() {
           @click="goToCheckIn"
         >
           Check In
+        </v-btn>
+        <v-btn
+          color="purple"
+          variant="elevated"
+          size="large"
+          class="text-white"
+          @click="goToReshelve"
+        >
+          Reshelve
+        </v-btn>
+        <v-btn
+          color="purple"
+          variant="elevated"
+          size="large"
+          class="text-white"
+          @click="goToReshelve"
+        >
+          Reshelve
         </v-btn>
         <v-btn
           color="orange"
