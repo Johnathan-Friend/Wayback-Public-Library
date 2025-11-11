@@ -465,9 +465,10 @@ async function payFeeBalance() {
 
 async function extendMembership() {
   try {
-    const membershipExpiration = new Date(patronDetails.value.MembershipExpiration);
-    const newExpirationDate = membershipExpiration.setFullYear(membershipExpiration.getFullYear() + 1);
-    patronDetails.value = await api.extendMembership(patronDetails.value.PatronID, newExpirationDate);
+    const membershipExpiration = new Date();
+    membershipExpiration.setFullYear(membershipExpiration.getFullYear() + 2);
+    const formattedDate = membershipExpiration.toISOString().split('T')[0];
+    patronDetails.value = await api.extendMembership(patronDetails.value.PatronID, formattedDate);
     checkPatronCheckoutStatus();
   } catch(error) {
     console.error(error);
