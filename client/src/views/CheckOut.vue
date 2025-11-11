@@ -523,11 +523,3 @@ function cancelTransaction() {
   justify-content: center;
 }
 </style>
-
-<!-- 
-TODO:
-
-Sprint 2:
-- need to only show items that are available for checkout (items not destoryed or currently checked out)
-- need to create a edit membership component to handle membership paying fees + renew membership
--->
