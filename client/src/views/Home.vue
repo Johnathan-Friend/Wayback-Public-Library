@@ -62,7 +62,16 @@ function goToReshelve() {
           Reshelve
         </v-btn>
         <v-btn
-          color="primary"
+          color="purple"
+          variant="elevated"
+          size="large"
+          class="text-white"
+          @click="goToReshelve"
+        >
+          Reshelve
+        </v-btn>
+        <v-btn
+          color="orange"
           variant="elevated"
           size="large"
           class="text-white"
