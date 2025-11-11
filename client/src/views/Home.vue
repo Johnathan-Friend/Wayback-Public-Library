@@ -49,7 +49,7 @@ function goToPatronMembership() {
           Check In
         </v-btn>
         <v-btn
-          color="primary"
+          color="orange"
           variant="elevated"
           size="large"
           class="text-white"

@@ -61,6 +61,14 @@
               Renew Membership
             </v-btn>
             <v-btn
+              color="secondary"
+              variant="elevated"
+              @click="payPatronFee"
+              :disabled="!hasPatronSelected"
+            >
+              Pay Fee
+            </v-btn>
+            <v-btn
               color="red"
               variant="elevated"
               @click="showDeleteDialog = true"
@@ -237,9 +245,9 @@ async function renewMembership() {
     }
   }
 
-  // New expiration = +1 year from base if base date is greater than today
+  // New expiration = +2 year from base if base date is greater than today
   const new_exp = new Date(base_date)
-  new_exp.setFullYear(base_date.getFullYear() + 1)
+  new_exp.setFullYear(base_date.getFullYear() + 2)
   const expirationDate = new_exp.toISOString().split('T')[0]
   // this could be ommited completely.
   const ok = window.confirm(`Renew membership until ${expirationDate}?`)
@@ -267,6 +275,17 @@ async function confirmDelete() {
     await loadPatrons()
   } catch (error) {
     console.error("Failed to delete patron:", error)
+    alert('Failed to delete patron: ' + (error.response?.data?.detail || 'Unknown error'))
+  }
+}
+
+async function payPatronFee() {
+  if (!hasPatronSelected.value) return
+
+  try {
+    patronDetails.value = await api.updatePatronFee(patronDetails.value.PatronID, "0");
+  } catch(error) {
+    console.error(error);
     alert('Failed to delete patron: ' + (error.response?.data?.detail || 'Unknown error'))
   }
 }

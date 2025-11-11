@@ -456,7 +456,6 @@ async function deleteTransaction(transaction) {
 
 async function payFeeBalance() {
   try {
-    console.log(patronDetails.value);
     patronDetails.value = await api.updatePatronFee(patronDetails.value.PatronID, "0");
     checkPatronCheckoutStatus();
   } catch(error) {
@@ -466,9 +465,10 @@ async function payFeeBalance() {
 
 async function extendMembership() {
   try {
-    const membershipExpiration = new Date(patronDetails.value.MembershipExpiration);
-    const newExpirationDate = membershipExpiration.setFullYear(membershipExpiration.getFullYear() + 1);
-    patronDetails.value = await api.extendMembership(patronDetails.value.PatronID, newExpirationDate);
+    const membershipExpiration = new Date();
+    membershipExpiration.setFullYear(membershipExpiration.getFullYear() + 2);
+    const formattedDate = membershipExpiration.toISOString().split('T')[0];
+    patronDetails.value = await api.extendMembership(patronDetails.value.PatronID, formattedDate);
     checkPatronCheckoutStatus();
   } catch(error) {
     console.error(error);
@@ -523,11 +523,3 @@ function cancelTransaction() {
   justify-content: center;
 }
 </style>
-
-<!-- 
-TODO:
-
-Sprint 2:
-- need to only show items that are available for checkout (items not destoryed or currently checked out)
-- need to create a edit membership component to handle membership paying fees + renew membership
--->
