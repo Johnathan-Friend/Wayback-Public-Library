@@ -26,7 +26,8 @@
                   rounded="lg"
                   text="Reshelve"
                   border
-                  @click="reshelve(item.id)"
+                  @click="reshelve(item.ItemID)"
+                  align="end"
                 ></v-btn>
               </div>
             </template>
@@ -38,15 +39,14 @@
 </template>
 
 <script setup>
+import api from '../api/api'
 import { onMounted, ref } from 'vue'
 
 const books = ref([])
 
 const headers = [
-  { title: 'ID', key: 'id', align: 'start' },
-  { title: 'ISBN', key: 'isbn' },
-  { title: 'Title', key: 'title' },
-  { title: 'DateReturned', key: 'date_returned' },
+  { title: 'ID', key: 'ItemID', align: 'start' },
+  { title: 'ISBN', key: 'ISBN' },
   { title: 'Actions', key: 'actions', sortable: false },
 ]
 
@@ -54,136 +54,19 @@ onMounted(() => {
   reset()
 })
 
-function reset() {
-  books.value = [
-    {
-      id: 1001,
-      isbn: '978-0321765723',
-      title: 'The C++ Programming Language',
-      date_returned: '2025-10-28',
-    },
-    {
-      id: 1002,
-      isbn: '978-0132354181',
-      title: 'Clean Code: A Handbook of Agile Software Craftsmanship',
-      date_returned: '2025-11-01',
-    },
-    {
-      id: 1003,
-      isbn: '978-0262033848',
-      title: 'Introduction to Algorithms',
-      date_returned: '2025-10-15',
-    },
-    {
-      id: 1004,
-      isbn: '978-0134685991',
-      title: 'Effective Java',
-      date_returned: '2025-10-15',
-    },
-    {
-      id: 1005,
-      isbn: '978-0596007126',
-      title: 'JavaScript: The Good Parts',
-      date_returned: '2025-11-02',
-    },
-    {
-      id: 1006,
-      isbn: '978-0135957355',
-      title: 'Design Patterns: Elements of Reusable Object-Oriented Software',
-      date_returned: '2025-10-15',
-    },
-    {
-      id: 1007,
-      isbn: '978-0735619678',
-      title: 'Code Complete: A Practical Handbook of Software Construction',
-      date_returned: '2025-10-22',
-    },
-    {
-      id: 1008,
-      isbn: '978-1449331818',
-      title: 'Learning Python, 5th Edition',
-      date_returned: '2025-11-03',
-    },
-    {
-      id: 1009,
-      isbn: '978-1491904244',
-      title: "You Don't Know JS: Up & Going",
-      date_returned: '2025-10-30',
-    },
-    {
-      id: 1010,
-      isbn: '978-0134494166',
-      title: 'Structure and Interpretation of Computer Programs',
-      date_returned: '2025-10-15',
-    },
-    {
-      id: 1011,
-      isbn: '978-0321125217',
-      title: 'Domain-Driven Design: Tackling Complexity in the Heart of Software',
-      date_returned: '2025-10-19',
-    },
-    {
-      id: 1012,
-      isbn: '978-0201835953',
-      title: 'The Mythical Man-Month: Essays on Software Engineering',
-      date_returned: '2025-11-04',
-    },
-    {
-      id: 1013,
-      isbn: '978-1934356591',
-      title: 'The Pragmatic Programmer: From Journeyman to Master',
-      date_returned: '2025-10-25',
-    },
-    {
-      id: 1014,
-      isbn: '978-0137081073',
-      title: 'Working Effectively with Legacy Code',
-      date_returned: '2025-10-15',
-    },
-    {
-      id: 1015,
-      isbn: '978-1492052203',
-      title: 'Database Internals: A Deep Dive into How Distributed Data Systems Work',
-      date_returned: '2025-10-29',
-    },
-    {
-      id: 1016,
-      isbn: '978-1718501121',
-      title: 'Eloquent JavaScript, 3rd Edition',
-      date_returned: '2025-11-01',
-    },
-    {
-      id: 1017,
-      isbn: '978-0596520687',
-      title: 'Head First Design Patterns',
-      date_returned: '2025-10-27',
-    },
-    {
-      id: 1018,
-      isbn: '978-0132181273',
-      title: 'Artificial Intelligence: A Modern Approach',
-      date_returned: '2025-10-15',
-    },
-    {
-      id: 1019,
-      isbn: '978-0134757599',
-      title: 'Deep Learning (Adaptive Computation and Machine Learning series)',
-      date_returned: '2025-10-20',
-    },
-    {
-      id: 1020,
-      isbn: '978-0321563842',
-      title: 'The C Programming Language',
-      date_returned: '2025-11-03',
-    },
-  ]
+async function reset() {
+  books.value = await api.getItemsNeedingReshelving()
+  console.log(books)
 }
 
-function reshelve(id) {
-  const index = books.value.findIndex((book) => book.id === id)
-  books.value.splice(index, 1)
+async function reshelve(id) {
+  await api.reshelveItem(id)
+  books.value = books.value.filter((book) => book.ItemID !== id)
 }
-function reshelveAll() {
-  books.value = []
+async function reshelveAll() {
+  for (const book of books.value) {
+    await reshelve(book.ItemID)
+  }
+  books.value = books.value.filter((book) => book.ItemID !== id)
 }
 </script>
