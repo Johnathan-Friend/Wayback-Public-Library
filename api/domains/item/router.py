@@ -126,3 +126,21 @@ def delete_item(
             detail="Item not found"
         )
     return db_item
+
+@router.post(
+    "/reshelve/{item_id}")
+def reshelve_item(
+    item_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Reshelve an item by its ItemID using the stored procedure.
+    """
+    try:
+        service.reshelve_item(item_id=item_id, db=db)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error reshelving item: {str(e)}"
+        )
+    return {"message": f"Item {item_id} reshelved successfully."}
