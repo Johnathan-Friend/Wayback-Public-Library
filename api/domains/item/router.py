@@ -32,6 +32,16 @@ def create_item(
     new_item = service.create_item(db=db, item=item)
     return new_item
 
+@router.get("/needs_reshelving/", response_model=List[schemas.ItemRead])
+def get_items_needing_reshelving(
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieve a list of items that need reshelving.
+    """
+    items = service.get_items_needing_reshelving(db)
+    return items
+
 
 # -----------------
 # --- READ (Many)
