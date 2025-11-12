@@ -85,7 +85,6 @@ def delete_item(db: Session, item_id: int) -> Optional[models.Item]:
     db.commit()
     return db_item
 
-
 # -----------------
 # --- CHECKED OUT ITEMS (Not Damaged)
 # -----------------

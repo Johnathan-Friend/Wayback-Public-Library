@@ -9,7 +9,10 @@ from datetime import date
 class ItemBase(BaseModel):
     ISBN: str
     BranchID: int
+    CurrentBranchID: Optional[int]
     IsDamaged: Optional[int]
+    Status: Optional[str]
+
 
 # 2. Create schema: Used for POST
 class ItemCreate(ItemBase):

@@ -32,6 +32,16 @@ def create_item(
     new_item = service.create_item(db=db, item=item)
     return new_item
 
+@router.get("/needs_reshelving/", response_model=List[schemas.ItemRead])
+def get_items_needing_reshelving(
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieve a list of items that need reshelving.
+    """
+    items = service.get_items_needing_reshelving(db)
+    return items
+
 
 
 # -----------------
@@ -173,3 +183,21 @@ def delete_item(
             detail="Item not found"
         )
     return db_item
+
+@router.post(
+    "/reshelve/{item_id}")
+def reshelve_item(
+    item_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Reshelve an item by its ItemID using the stored procedure.
+    """
+    try:
+        service.reshelve_item(item_id=item_id, db=db)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error reshelving item: {str(e)}"
+        )
+    return {"message": f"Item {item_id} reshelved successfully."}
