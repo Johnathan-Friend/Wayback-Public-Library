@@ -15,6 +15,11 @@ def get_item(db: Session, item_id: int) -> Optional[models.Item]:
     """
     return db.query(models.Item).filter(models.Item.ItemID == item_id).first()
 
+def get_items_needing_reshelving(db: Session) -> List[models.Item]:
+    """
+    Get a list of items that need reshelving.
+    """
+    return db.query(models.Item).filter(models.Item.Status == 'Needs Reshelving').all()
 
 # -----------------
 # --- READ (Many)
@@ -201,16 +206,6 @@ def get_checked_in_items(db: Session, skip: int = 0, limit: int = 100) -> List[d
         })
     
     return items_list
-
-
-# -----------------
-# --- GET ITEMS NEEDING RESHELVING
-# -----------------
-def get_items_needing_reshelving(db: Session) -> List[models.Item]:
-    """
-    Get a list of items that need reshelving.
-    """
-    return db.query(models.Item).filter(models.Item.Status == 'Needs Reshelving').all()
 
 
 # -----------------
