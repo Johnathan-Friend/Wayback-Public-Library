@@ -159,8 +159,11 @@ def process_item_checkin(db: Session, return_request: schemas.ItemReturnRequest)
 def checkout_item(db: Session, patron_id: int, item_id: int):
     """
     Handles logic for checking out an item.
-    Includes validation for item damage, duplicate checkouts,
-    and applies the correct rental length based on ItemType.
+    Includes validation for:
+      - Damaged items
+      - Items marked as 'Needs Reshelving'
+      - Duplicate checkouts
+    Applies correct rental length based on ItemType and updates status to 'Checked Out'.
     """
 
     # Step 1: Validate patron and item existence
@@ -174,17 +177,24 @@ def checkout_item(db: Session, patron_id: int, item_id: int):
     if item.IsDamaged and item.IsDamaged != 0:
         raise HTTPException(status_code=400, detail="Item is damaged and cannot be checked out")
 
-    # Step 3: Ensure item is not already checked out
+    # Step 3: Prevent checkout if item status is "Needs Reshelving"
+    if hasattr(item, "Status") and item.Status == "Needs Reshelving":
+        raise HTTPException(
+            status_code=400,
+            detail="Item cannot be checked out — it is currently marked as 'Needs Reshelving'"
+        )
+
+    # Step 4: Ensure item is not already checked out
     active_checkout = get_active_transaction_for_item(db, item_id)
     if active_checkout:
         raise HTTPException(status_code=400, detail="Item is already checked out")
 
-    # Step 4: Determine rental length from ItemType
+    # Step 5: Determine rental length from ItemType (default = 14)
     item_details = item.ItemDetails_
     item_type = item_details.ItemType_ if item_details else None
     rental_length = getattr(item_type, "RentalLength", 14)
 
-    # Step 5: Create new transaction with correct due date
+    # Step 6: Create new transaction with correct due date
     new_transaction = models.Transactions(
         PatronID=patron.PatronID,
         ItemID=item.ItemID,
@@ -196,6 +206,12 @@ def checkout_item(db: Session, patron_id: int, item_id: int):
 
     try:
         db.add(new_transaction)
+
+        # Step 7: Update item status to "Checked Out"
+        if hasattr(item, "Status"):
+            item.Status = "Checked Out"
+            db.add(item)
+
         db.commit()
         db.refresh(new_transaction)
 
@@ -204,7 +220,8 @@ def checkout_item(db: Session, patron_id: int, item_id: int):
             "transaction_id": new_transaction.TransactionID,
             "patron_id": patron.PatronID,
             "item_id": item.ItemID,
-            "date_due": new_transaction.DateDue.isoformat()
+            "date_due": new_transaction.DateDue.isoformat(),
+            "item_status": getattr(item, "Status", None)
         }
 
     except SQLAlchemyError as e:
