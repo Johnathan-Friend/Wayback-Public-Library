@@ -43,6 +43,7 @@ def get_items_needing_reshelving(
     return items
 
 
+
 # -----------------
 # --- READ (Many)
 # -----------------
@@ -60,8 +61,54 @@ def read_items(
     """
     items = service.get_items(db, skip=skip, limit=limit)
     return items
+# -----------------
+# --- CHECKED OUT ITEMS
+# -----------------
+@router.get(
+    "/checked-out",
+    response_model=List[schemas.ItemWithDetailsRead],
+    summary="Get all checked-out items (not damaged)"
+)
+def read_checked_out_items(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieve all items that are currently checked out and not damaged.
+    
+    Returns items with:
+    - Active transaction (DateReturned is NULL)
+    - IsDamaged = 0
+    - Includes patron and transaction details
+    """
+    items = service.get_checked_out_items(db, skip=skip, limit=limit)
+    return items
 
 
+# -----------------
+# --- CHECKED IN ITEMS
+# -----------------
+@router.get(
+    "/checked-in",
+    response_model=List[schemas.ItemWithDetailsRead],
+    summary="Get all checked-in items (not damaged)"
+)
+def read_checked_in_items(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieve all items that are currently checked in (available) and not damaged.
+    
+    Returns items with:
+    - No active transaction (all transactions returned or never checked out)
+    - IsDamaged = 0
+    - Includes item details
+    """
+    items = service.get_checked_in_items(db, skip=skip, limit=limit)
+    return items
 # -----------------
 # --- READ (One)
 # -----------------
