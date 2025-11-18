@@ -7,7 +7,9 @@ from sqlalchemy.orm import sessionmaker
 
 SQLALCHEMY_DATABASE_URL=f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}"
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(SQLALCHEMY_DATABASE_URL,
+                        pool_recycle=3600,
+                        pool_pre_ping=True) ### Thank you Gemini for this fix! The error was likely due to a timeout on the SQL server-side. -JT
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
