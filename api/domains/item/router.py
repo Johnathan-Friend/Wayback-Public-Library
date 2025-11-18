@@ -51,6 +51,21 @@ def read_items(
     items = service.get_items(db, skip=skip, limit=limit)
     return items
 
+@router.get(
+    "/available/",
+    response_model=List[schemas.ItemRead]
+)
+def read_items(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieve a list of items with pagination.
+    """
+    items = service.get_available_items(db, skip=skip, limit=limit)
+    return items
+
 
 # -----------------
 # --- READ (One)
