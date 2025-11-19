@@ -27,7 +27,7 @@ def get_available_items(db: Session, skip: int = 0, limit: int = 100) -> List[mo
     """
     Get a list of all items with pagination.
     """
-    return db.query(models.Item).offset(skip).limit(limit).all()
+    return db.query(models.Item).filter(models.Item.Status == "Available").offset(skip).limit(limit).all()
 
 
 # -----------------
