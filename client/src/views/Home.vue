@@ -19,6 +19,10 @@ function goToPatronMembership() {
 function goToReshelve() {
   router.push('/reshelve');
 }
+
+function goToReservation() {
+  router.push('/reservation');
+}
 </script>
 
 <template>
@@ -33,7 +37,7 @@ function goToReshelve() {
     >
       <v-icon :icon="mdiBookOpenPageVariant" size="72" color="primary" class="mb-6"/>
       <h1 class="mb-8 library-title">Wayback Public Library</h1>
-      <div class="d-flex justify-center gap-4">
+      <div class="d-flex justify-center gap-4 flex-wrap">
         <v-btn
           color="secondary"
           variant="elevated"
@@ -69,6 +73,15 @@ function goToReshelve() {
           @click="goToPatronMembership"
         >
           Patron Membership
+        </v-btn>
+        <v-btn
+          color="yellow"
+          variant="elevated"
+          size="large"
+          class="text-white"
+          @click="goToReservation"
+        >
+          Reservation
         </v-btn>
       </div>
     </v-card>

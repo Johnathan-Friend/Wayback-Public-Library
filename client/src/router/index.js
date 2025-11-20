@@ -4,6 +4,7 @@ import CheckOut from '@/views/CheckOut.vue'
 import Home from '@/views/Home.vue'
 import Reshelve from '@/views/Reshelve.vue'
 import PatronMembership from "@/views/PatronMembership.vue";
+import Reservation from '@/views/Reservation.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -33,6 +34,11 @@ const router = createRouter({
       name: 'Reshelve',
       component: Reshelve,
     },
+    {
+      path: '/reservation',
+      name: 'Reservation',
+      component: Reservation
+    }
   ],
 })
 

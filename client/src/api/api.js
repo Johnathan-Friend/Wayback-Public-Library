@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { withRetry } from './withRetry'
 
 const apiClient = axios.create({
   baseURL: 'https://wayback.twnsnd.net/api/v1/',
@@ -11,10 +12,19 @@ const apiClient = axios.create({
 const api = {
   async getAllItems() {
     try {
-      const response = await apiClient.get('items/')
+      const response = await apiClient.get("items/");
       return response.data
     } catch (error) {
       throw error
+    }
+  },
+
+  async getAvailableItemsForCheckout() {
+    try {
+      const response = await apiClient.get('items/available/');
+      return response.data;
+    } catch (error) {
+      throw error;
     }
   },
 
@@ -213,15 +223,3 @@ const api = {
 }
 
 export default api
-
-//example on how to import and use
-// import api from "@/api";
-//
-// async function loadUsers() {
-//     try {
-//         const users = await api.getUsers();
-//         console.log(users);
-//     } catch (err) {
-//         console.error("Failed to load users:", err);
-//     }
-// }
