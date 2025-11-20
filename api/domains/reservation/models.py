@@ -1,7 +1,8 @@
 from typing import Optional
+import datetime
 import decimal
 
-from sqlalchemy import DECIMAL, Enum, ForeignKeyConstraint, Index, Integer, String, Text, text
+from sqlalchemy import DECIMAL, Date, Enum, ForeignKeyConstraint, Index, Integer, String, Text, text
 from sqlalchemy.dialects.mysql import TINYINT
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -28,6 +29,18 @@ class ItemType(Base):
     FeeAmount: Mapped[Optional[decimal.Decimal]] = mapped_column(DECIMAL(8, 2), server_default=text("'0.00'"))
 
     ItemDetails: Mapped[list['ItemDetails']] = relationship('ItemDetails', back_populates='ItemType_')
+
+
+class Patron(Base):
+    __tablename__ = 'Patron'
+
+    PatronID: Mapped[int] = mapped_column(Integer, primary_key=True)
+    FirstName: Mapped[str] = mapped_column(String(50), nullable=False)
+    LastName: Mapped[str] = mapped_column(String(50), nullable=False)
+    MembershipExpiration: Mapped[Optional[datetime.date]] = mapped_column(Date)
+    FeeBalance: Mapped[Optional[decimal.Decimal]] = mapped_column(DECIMAL(8, 2), server_default=text("'0.00'"))
+
+    Reservation: Mapped[list['Reservation']] = relationship('Reservation', back_populates='Patron_')
 
 
 class ItemDetails(Base):
@@ -63,11 +76,31 @@ class Item(Base):
     ItemID: Mapped[int] = mapped_column(Integer, primary_key=True)
     ISBN: Mapped[str] = mapped_column(String(20), nullable=False)
     BranchID: Mapped[int] = mapped_column(Integer, nullable=False)
-    IsReserved: Mapped[int] = mapped_column(TINYINT(1), nullable=False, server_default=text("'0'"))
     IsDamaged: Mapped[Optional[int]] = mapped_column(TINYINT(1), server_default=text("'0'"))
-    Status: Mapped[Optional[str]] = mapped_column(Enum('Available', 'Checked Out', 'Needs Reshelving', 'On Hold for Pickup'), server_default=text("'Available'"))
+    Status: Mapped[Optional[str]] = mapped_column(Enum('Available', 'Checked Out', 'Needs Reshelving', 'Reshelved'), server_default=text("'Available'"))
     CurrentBranchID: Mapped[Optional[int]] = mapped_column(Integer)
 
     Branch_: Mapped['Branch'] = relationship('Branch', foreign_keys=[BranchID], back_populates='Item')
     Branch1: Mapped[Optional['Branch']] = relationship('Branch', foreign_keys=[CurrentBranchID], back_populates='Item_')
     ItemDetails_: Mapped['ItemDetails'] = relationship('ItemDetails', back_populates='Item')
+    Reservation: Mapped[list['Reservation']] = relationship('Reservation', back_populates='Item_')
+
+
+class Reservation(Base):
+    __tablename__ = 'Reservation'
+    __table_args__ = (
+        ForeignKeyConstraint(['ItemID'], ['Item.ItemID'], name='Reservation_ibfk_2'),
+        ForeignKeyConstraint(['PatronID'], ['Patron.PatronID'], name='Reservation_ibfk_1'),
+        Index('ItemID', 'ItemID'),
+        Index('PatronID', 'PatronID')
+    )
+
+    ReservationID: Mapped[int] = mapped_column(Integer, primary_key=True)
+    PatronID: Mapped[int] = mapped_column(Integer, nullable=False)
+    ItemID: Mapped[int] = mapped_column(Integer, nullable=False)
+    ReservationDate: Mapped[Optional[datetime.date]] = mapped_column(Date, server_default=text('(curdate())'))
+    ReservationExpirationDate: Mapped[Optional[datetime.date]] = mapped_column(Date)
+    PickupDate: Mapped[Optional[datetime.date]] = mapped_column(Date)
+
+    Item_: Mapped['Item'] = relationship('Item', back_populates='Reservation')
+    Patron_: Mapped['Patron'] = relationship('Patron', back_populates='Reservation')

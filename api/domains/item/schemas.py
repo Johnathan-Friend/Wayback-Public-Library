@@ -9,7 +9,10 @@ from datetime import date
 class ItemBase(BaseModel):
     ISBN: str
     BranchID: int
+    CurrentBranchID: Optional[int]
     IsDamaged: Optional[int]
+    Status: Optional[str]
+
 
 # 2. Create schema: Used for POST
 class ItemCreate(ItemBase):
@@ -28,3 +31,22 @@ class ItemUpdate(BaseModel):
     ISBN: Optional[str]
     BranchID: Optional[int]
     IsDamaged: Optional[int]
+    
+# 5. Extended Read schema with related data for checked-out/checked-in lists
+class ItemWithDetailsRead(BaseModel):
+    ItemID: int
+    ISBN: str
+    BranchID: int
+    IsDamaged: int
+    # Include ItemDetails information
+    Title: Optional[str] = None
+    ItemTypeName: Optional[str] = None
+    # Include Transaction information (for checked-out items)
+    TransactionID: Optional[int] = None
+    PatronID: Optional[int] = None
+    PatronName: Optional[str] = None
+    DateStart: Optional[date] = None
+    DateDue: Optional[date] = None
+    
+    class Config:
+        from_attributes = True

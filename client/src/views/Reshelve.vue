@@ -12,17 +12,19 @@
 
                 <v-btn
                   class="me-2"
+                  variant="elevated"
+                  color="green"
                   rounded="lg"
-                  text="Reshelve All"
                   border
                   @click="reshelveAll"
-                ></v-btn>
+                >Reshelve All</v-btn>
               </v-toolbar>
             </template>
             <template v-slot:item.actions="{ item }">
               <div class="d-flex">
                 <v-btn
                   class="me-2"
+                  color="primary"
                   rounded="lg"
                   text="Reshelve"
                   border
@@ -33,6 +35,11 @@
             </template>
           </v-data-table>
         </v-sheet>
+        <div class="d-flex mt-10">
+          <v-btn color="black" @click="goBack" variant="outlined">
+            Return to Home
+          </v-btn>
+        </div>
       </v-col>
     </v-row>
   </v-container>
@@ -41,8 +48,11 @@
 <script setup>
 import api from '../api/api'
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router';
 
-const books = ref([])
+const router = useRouter();
+
+const books = ref([]);
 
 const headers = [
   { title: 'ID', key: 'ItemID', align: 'start' },
@@ -56,7 +66,6 @@ onMounted(() => {
 
 async function reset() {
   books.value = await api.getItemsNeedingReshelving()
-  console.log(books)
 }
 
 async function reshelve(id) {
@@ -68,5 +77,9 @@ async function reshelveAll() {
     await reshelve(book.ItemID)
   }
   books.value = books.value.filter((book) => book.ItemID !== id)
+}
+
+function goBack() {
+  router.push('/');
 }
 </script>

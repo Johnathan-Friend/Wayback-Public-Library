@@ -7,6 +7,7 @@ const apiClient = axios.create({
   },
 })
 
+//GET requests
 const api = {
   async getAllItems() {
     try {
@@ -128,18 +129,87 @@ const api = {
     }
   },
 
-  //DELETE requests
-  async deleteTransaction(transactionID) {
-    try {
-      const response = await apiClient.delete(`transactions/${transactionID}`)
-      return { data: response.data, status: 200 }
-    } catch (error) {
-      if (error.status === 400 && error.response?.data?.detail) {
-        return { data: error.response?.data?.detail, status: 400 }
-      }
-      throw error
+    async checkInItem(patronId, itemId, returnDate) {
+        try {
+            const response = await apiClient.post('transactions/checkin', {
+                patron_id: patronId,
+                item_id: itemId,
+                return_date: returnDate
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    //PATCH requests
+    async updatePatronFee(patronId, newFee) {
+        try {
+            const response = await apiClient.patch(`patrons/${patronId}`, {
+                 FeeBalance: newFee
+            });
+            return response.data;
+        }
+        catch (error) {
+            throw error;
+        }
+    },
+
+    async extendMembership(patronId, newMembershipExpirationDate) {
+        try {
+            const response = await apiClient.patch(`patrons/${patronId}`, {
+                MembershipExpiration: newMembershipExpirationDate
+            });
+            return response.data;
+        }
+        catch (error) {
+            throw error;
+        }
+    },
+
+    //DELETE requests
+    async deleteTransaction(transactionID) {
+        try {
+            const response = await apiClient.delete(`transactions/${transactionID}`);
+            return { data: response.data, status: 200 };
+        } catch (error) {
+            if (error.status === 400 && error.response?.data?.detail) {
+                return { data: error.response?.data?.detail, status: 400 };
+            }
+            throw error;
+        }
+    },
+
+    // Patron management
+    async createPatron(firstName, lastName) {
+        try {
+            const response = await apiClient.post('patrons/', {
+                FirstName: firstName,
+                LastName: lastName
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async updatePatron(patronId, updateData) {
+        try {
+            const response = await apiClient.patch(`patrons/${patronId}`, updateData);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async deletePatron(patronId) {
+        try {
+            const response = await apiClient.delete(`patrons/${patronId}`);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
     }
-  },
 }
 
 export default api

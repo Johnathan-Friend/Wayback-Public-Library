@@ -44,17 +44,39 @@
           <v-divider class="my-3"></v-divider>
           <v-card-text>
             <div class="d-flex flex-column gap-2">
-              <div class="pb-2">
-                <strong>Membership Expires:</strong>
-                <div>{{ patronDetails.MembershipExpiration }}</div>
+              <div class="d-flex align-center justify-space-between">
+                <div class="pb-2">
+                  <strong>Membership Expires:</strong>
+                  <div>{{ patronDetails.MembershipExpiration }}</div>
+                </div>
+                <v-btn
+                  v-if="showExtendMembership"
+                  variant="text"
+                  color="green"
+                  class="text-decoration-underline"
+                  @click="extendMembership"
+                >
+                  Extend Membership
+                </v-btn>
               </div>
               <div class="pb-2">
                 <strong>Number of Items Checked Out:</strong>
                 <div>{{ patronDetails.ItemsCheckedOut }}</div>
               </div>
-              <div>
-                <strong>Fee Balance:</strong>
-                <div>${{ patronDetails.FeeBalance }}</div>
+              <div class="d-flex align-center justify-space-between">
+                <div>
+                  <strong>Fee Balance:</strong>
+                  <div>${{ patronDetails.FeeBalance }}</div>
+                </div>
+                <v-btn
+                  v-if="showPayFeeBalance"
+                  variant="text"
+                  color="green"
+                  class="text-decoration-underline"
+                  @click="payFeeBalance"
+                >
+                  Pay Fee
+                </v-btn>
               </div>
             </div>
           </v-card-text>
@@ -259,6 +281,8 @@ const transactionError = ref(null);
 const showConfirmDialog = ref(false);
 const transactions = ref([]);
 const transactionTableError = ref(null);
+const showExtendMembership = ref(false);
+const showPayFeeBalance = ref(false);
 
 onMounted(() => {
   loadItems();
@@ -343,18 +367,23 @@ function checkPatronCheckoutStatus() {
   const feeBalance = patronDetails.value.FeeBalance;
   const membershipExpiration = new Date(patronDetails.value.MembershipExpiration);
   const today = new Date();
+  showPayFeeBalance.value = false;
+  showExtendMembership.value = false;
   if (itemsCheckedOut === '' || itemsCheckedOut >= maximumNumberOfItemsCheckoutAtOnce) {
     patronSelectionError.value = 'Patron has the maximum number of items checked out. Cannot checkout at this time.';
     return;
   }
   if (feeBalance === '' || feeBalance > 0) {
     patronSelectionError.value = 'Patron has an outstanding fee balance. Cannot checkout at this time.';
+    showPayFeeBalance.value = true;
     return;
   }
   if (membershipExpiration <= today) {
     patronSelectionError.value = 'Membership has exprired, please renew membership to checkout books. Cannot check out at this time.';
+    showExtendMembership.value = true;
     return;
   }
+  patronSelectionError.value = null;
   numberOfItemsAvailableToCheckout.value = maximumNumberOfItemsCheckoutAtOnce - itemsCheckedOut;
   patronCanCheckoutItems.value = true;
 }
@@ -364,6 +393,8 @@ function clearPatronState() {
   patronCanCheckoutItems.value = false;
   patronDetails.value = emptyPatronState;
   hasPatronSelected.value = false;
+  showExtendMembership.value = false;
+  showPayFeeBalance.value = false;
 }
 
 const formatPatronTitle = (patron) => {
@@ -423,6 +454,27 @@ async function deleteTransaction(transaction) {
   }
 }
 
+async function payFeeBalance() {
+  try {
+    patronDetails.value = await api.updatePatronFee(patronDetails.value.PatronID, "0");
+    checkPatronCheckoutStatus();
+  } catch(error) {
+    console.error(error);
+  }
+}
+
+async function extendMembership() {
+  try {
+    const membershipExpiration = new Date();
+    membershipExpiration.setFullYear(membershipExpiration.getFullYear() + 2);
+    const formattedDate = membershipExpiration.toISOString().split('T')[0];
+    patronDetails.value = await api.extendMembership(patronDetails.value.PatronID, formattedDate);
+    checkPatronCheckoutStatus();
+  } catch(error) {
+    console.error(error);
+  }
+}
+
 function completeTransaction() {
   showConfirmDialog.value = true;
 }
@@ -471,11 +523,3 @@ function cancelTransaction() {
   justify-content: center;
 }
 </style>
-
-<!-- 
-TODO:
-
-Sprint 2:
-- need to only show items that are available for checkout (items not destoryed or currently checked out)
-- need to create a edit membership component to handle membership paying fees + renew membership
--->
