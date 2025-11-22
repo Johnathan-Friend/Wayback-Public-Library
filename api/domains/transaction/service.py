@@ -188,6 +188,7 @@ def checkout_item(db: Session, patron_id: int, item_id: int):
             detail="Item cannot be checked out — it is currently marked as 'Needs Reshelving'"
         )
 
+
     # Step 4: Ensure item is not already checked out
     active_checkout = get_transaction_for_item(db, item_id)
     if active_checkout:
