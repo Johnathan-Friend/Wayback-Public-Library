@@ -26,7 +26,7 @@ def get_transactions(db: Session, skip: int = 0, limit: int = 100) -> List[model
     return db.query(models.Transactions).offset(skip).limit(limit).all()
 
 
-def get_active_transaction_for_item(db: Session, item_id: int) -> Optional[models.Transactions]:
+def get_transaction_for_item(db: Session, item_id: int) -> Optional[models.Transactions]:
     """
     Returns the most recent transaction for an item that has not been returned yet.
     """
