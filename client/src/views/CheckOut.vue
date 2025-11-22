@@ -291,7 +291,7 @@ onMounted(() => {
 
 async function loadItems() {
   try {
-    items.value = await api.getAllItems();
+    items.value = await api.getAvailableItemsForCheckout();
   } catch (err) {
     console.error("Failed to load items:", err);
   }
