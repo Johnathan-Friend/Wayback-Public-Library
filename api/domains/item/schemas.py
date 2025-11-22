@@ -31,6 +31,7 @@ class ItemUpdate(BaseModel):
     ISBN: Optional[str]
     BranchID: Optional[int]
     IsDamaged: Optional[int]
+    Status: Optional[str]
     
 # 5. Extended Read schema with related data for checked-out/checked-in lists
 class ItemWithDetailsRead(BaseModel):

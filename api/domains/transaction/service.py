@@ -10,6 +10,8 @@ from . import models, schemas
 from ..item.models import Item
 from ..item_type.models import ItemType
 from ..patron.models import Patron
+from ..item.schemas import ItemRead, ItemUpdate
+from ..item.service import update_item, get_item
 
 
 # =====================================================
@@ -24,7 +26,7 @@ def get_transactions(db: Session, skip: int = 0, limit: int = 100) -> List[model
     return db.query(models.Transactions).offset(skip).limit(limit).all()
 
 
-def get_active_transaction_for_item(db: Session, item_id: int) -> Optional[models.Transactions]:
+def get_transaction_for_item(db: Session, item_id: int) -> Optional[models.Transactions]:
     """
     Returns the most recent transaction for an item that has not been returned yet.
     """
@@ -95,18 +97,20 @@ def process_item_checkin(db: Session, return_request: schemas.ItemReturnRequest)
     """
 
     sql_call = text("""
-        CALL CheckInItem(
+        CALL CheckInItem2(
             :p_patron_id, 
             :p_item_id, 
-            :p_return_date
+            :p_return_date,
+            :p_return_branch_id
         )
     """)
 
     params = {
         "p_patron_id": return_request.patron_id,
         "p_item_id": return_request.item_id,
-        "p_return_date": return_request.return_date
-    }
+        "p_return_date": return_request.return_date,
+        "p_return_branch_id": 1,
+        }
 
     try:
         result_row = db.execute(sql_call, params).first()
@@ -184,8 +188,9 @@ def checkout_item(db: Session, patron_id: int, item_id: int):
             detail="Item cannot be checked out — it is currently marked as 'Needs Reshelving'"
         )
 
+
     # Step 4: Ensure item is not already checked out
-    active_checkout = get_active_transaction_for_item(db, item_id)
+    active_checkout = get_transaction_for_item(db, item_id)
     if active_checkout:
         raise HTTPException(status_code=400, detail="Item is already checked out")
 
@@ -206,11 +211,18 @@ def checkout_item(db: Session, patron_id: int, item_id: int):
 
     try:
         db.add(new_transaction)
-
+        item_update_data = ItemUpdate(
+            Status="Checked Out",
+            ISBN=item.ISBN,          # <--- Pass existing value
+            BranchID=item.BranchID,  # <--- Pass existing value
+            IsDamaged=item.IsDamaged # <--- Pass existing value
+        )
         # Step 7: Update item status to "Checked Out"
-        if hasattr(item, "Status"):
-            item.Status = "Checked Out"
-            db.add(item)
+        update_item(
+            db,
+            item_id=item.ItemID,
+            item_update=item_update_data)
+        
 
         db.commit()
         db.refresh(new_transaction)
