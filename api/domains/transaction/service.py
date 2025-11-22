@@ -189,7 +189,7 @@ def checkout_item(db: Session, patron_id: int, item_id: int):
         )
 
     # Step 4: Ensure item is not already checked out
-    active_checkout = get_active_transaction_for_item(db, item_id)
+    active_checkout = get_transaction_for_item(db, item_id)
     if active_checkout:
         raise HTTPException(status_code=400, detail="Item is already checked out")
 
