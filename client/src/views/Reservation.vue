@@ -38,7 +38,6 @@
                 variant="outlined"
                 density="comfortable"
                 clearable
-                @input="fetchDetails"
                 />
             </v-col>
             <v-col cols="12" md="4">
@@ -52,7 +51,6 @@
                 v-model="selectedFilter"
                 variant="outlined"
                 density="comfortable"
-                @update:modelValue="fetchDetails"
                 />
             </v-col>
         </v-row>
@@ -94,27 +92,63 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref, computed, onMounted } from "vue"
 import { mdiDelete } from "@mdi/js"
 import { useRouter } from "vue-router"
+import api from '../api/api'
 
 const router = useRouter();
 const selectedFilter = ref('reservation');
 const searchQuery = ref('');
 const selectedSearchValue = ref(null);
 const leftPanelError = ref(null);
-const reservations = ref([]);
+const allReservations = ref([]);
 const tableError = ref(null);
 
-const reservationHeaders = [{ title: "Reservation ID", key: "id" },{ title: "Name/Item", key: "label" },{ title: "Details", key: "details" },{ title: "Actions", key: "actions", sortable: false }];
+const reservationHeaders = [
+  { title: "Reservation ID", key: "id" },
+  { title: "Name/Item", key: "label" },
+  { title: "Details", key: "details" },
+  { title: "Actions", key: "actions", sortable: false }
+];
 
-// Placeholder: will need to be replaced by real lookup API
-async function fetchDetails() {
-  // Example call — adjust to your API needs
-  await api.search({
-    filter: selectedFilter.value,
-    query: searchQuery.value
-  });
+const reservations = computed(() => {
+  if (!searchQuery.value || !searchQuery.value.trim()) {
+    return allReservations.value.map(formatReservation);
+  }
+
+  const query = searchQuery.value.trim();
+  return allReservations.value
+    .filter(reservation => {
+      if (selectedFilter.value === 'reservation') {
+        return reservation.ReservationID.toString().includes(query);
+      } else if (selectedFilter.value === 'patron') {
+        return reservation.PatronID.toString().includes(query);
+      } else if (selectedFilter.value === 'item') {
+        return reservation.ItemID.toString().includes(query);
+      }
+      return true;
+    })
+    .map(formatReservation);
+});
+
+function formatReservation(reservation) {
+  return {
+    id: reservation.ReservationID,
+    label: `Patron ${reservation.PatronID} / Item ${reservation.ItemID}`,
+    details: `Reserved: ${reservation.ReservationDate || 'N/A'} | Expires: ${reservation.ReservationExpirationDate || 'N/A'}`,
+    reservationId: reservation.ReservationID
+  };
+}
+
+async function loadReservations() {
+  try {
+    tableError.value = null;
+    allReservations.value = await api.getAllReservations();
+  } catch (error) {
+    console.error("Failed to load reservations:", error);
+    tableError.value = error.response?.data?.detail || 'Failed to load reservations';
+  }
 }
 
 function addReservationEntry() {
@@ -125,13 +159,28 @@ function addReservationEntry() {
   })
 }
 
-function deleteReservation(item) {
-  reservations.value = reservations.value.filter(r => r.id !== item.id)
+async function deleteReservation(item) {
+  if (!confirm(`Are you sure you want to delete reservation ${item.id}?`)) {
+    return;
+  }
+  
+  try {
+    tableError.value = null;
+    await api.deleteReservation(item.reservationId);
+    await loadReservations();
+  } catch (error) {
+    console.error("Failed to delete reservation:", error);
+    tableError.value = error.response?.data?.detail || 'Failed to delete reservation';
+  }
 }
 
 function goBack() {
   router.push("/")
 }
+
+onMounted(() => {
+  loadReservations();
+});
 </script>
 
 <style scoped>
