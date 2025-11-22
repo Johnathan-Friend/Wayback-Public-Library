@@ -30,6 +30,12 @@ def get_items(db: Session, skip: int = 0, limit: int = 100) -> List[models.Item]
     """
     return db.query(models.Item).offset(skip).limit(limit).all()
 
+def get_available_items(db: Session, skip: int = 0, limit: int = 100) -> List[models.Item]:
+    """
+    Get a list of all items with pagination.
+    """
+    return db.query(models.Item).filter(models.Item.Status == "Available").offset(skip).limit(limit).all()
+
 
 # -----------------
 # --- CREATE

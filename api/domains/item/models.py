@@ -63,8 +63,9 @@ class Item(Base):
     ItemID: Mapped[int] = mapped_column(Integer, primary_key=True)
     ISBN: Mapped[str] = mapped_column(String(20), nullable=False)
     BranchID: Mapped[int] = mapped_column(Integer, nullable=False)
+    IsReserved: Mapped[int] = mapped_column(TINYINT(1), nullable=False, server_default=text("'0'"))
     IsDamaged: Mapped[Optional[int]] = mapped_column(TINYINT(1), server_default=text("'0'"))
-    Status: Mapped[Optional[str]] = mapped_column(Enum('Available', 'Checked Out', 'Needs Reshelving', 'Reshelved'), server_default=text("'Available'"))
+    Status: Mapped[Optional[str]] = mapped_column(Enum('Available', 'Checked Out', 'Needs Reshelving', 'On Hold for Pickup'), server_default=text("'Available'"))
     CurrentBranchID: Mapped[Optional[int]] = mapped_column(Integer)
 
     Branch_: Mapped['Branch'] = relationship('Branch', foreign_keys=[BranchID], back_populates='Item')
