@@ -10,6 +10,7 @@ from . import models, schemas
 from ..item.models import Item
 from ..item_type.models import ItemType
 from ..patron.models import Patron
+from ..item.service import update_item
 
 
 # =====================================================
@@ -208,9 +209,11 @@ def checkout_item(db: Session, patron_id: int, item_id: int):
         db.add(new_transaction)
 
         # Step 7: Update item status to "Checked Out"
-        if hasattr(item, "Status"):
-            item.Status = "Checked Out"
-            db.add(item)
+        update_item(
+            db,
+            item_id=item.ItemID,
+            item_update=schemas.ItemUpdate(Status="Checked Out")
+        )
 
         db.commit()
         db.refresh(new_transaction)
