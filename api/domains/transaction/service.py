@@ -10,7 +10,8 @@ from . import models, schemas
 from ..item.models import Item
 from ..item_type.models import ItemType
 from ..patron.models import Patron
-from ..item.service import update_item
+from ..item.schemas import ItemRead, ItemUpdate
+from ..item.service import update_item, get_item
 
 
 # =====================================================
@@ -209,13 +210,18 @@ def checkout_item(db: Session, patron_id: int, item_id: int):
 
     try:
         db.add(new_transaction)
-
+        item_update_data = ItemUpdate(
+            Status="Checked Out",
+            ISBN=item.ISBN,          # <--- Pass existing value
+            BranchID=item.BranchID,  # <--- Pass existing value
+            IsDamaged=item.IsDamaged # <--- Pass existing value
+        )
         # Step 7: Update item status to "Checked Out"
         update_item(
             db,
             item_id=item.ItemID,
-            item_update=schemas.ItemUpdate(Status="Checked Out")
-        )
+            item_update=item_update_data)
+        
 
         db.commit()
         db.refresh(new_transaction)
