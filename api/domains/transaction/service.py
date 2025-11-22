@@ -96,18 +96,20 @@ def process_item_checkin(db: Session, return_request: schemas.ItemReturnRequest)
     """
 
     sql_call = text("""
-        CALL CheckInItem(
+        CALL CheckInItem2(
             :p_patron_id, 
             :p_item_id, 
-            :p_return_date
+            :p_return_date,
+            :p_return_branch_id
         )
     """)
 
     params = {
         "p_patron_id": return_request.patron_id,
         "p_item_id": return_request.item_id,
-        "p_return_date": return_request.return_date
-    }
+        "p_return_date": return_request.return_date,
+        "p_return_branch_id": 1,
+        }
 
     try:
         result_row = db.execute(sql_call, params).first()

@@ -52,7 +52,7 @@ class ItemReturnRequest(BaseModel):
     return_date: date
 
 class ItemReturnResponse(BaseModel):
-    Status: str
+    StatusMessage: str
     PatronID: int
     PatronName: str
     TransactionID: int
@@ -63,6 +63,8 @@ class ItemReturnResponse(BaseModel):
     DaysLate: int
     FeeCharged: Decimal
     UpdatedBalance: Decimal
+    ItemStatus: str
+    BranchID: int
 
     class Config:
         from_attributes = True
