@@ -424,6 +424,7 @@ async function checkOutItem() {
   if (hasItemSelected.value) {
     const details = await createTransaction();
     if (details.success) {
+      items.value = items.value.filter(item => item.ItemID !== selectedItemID.value);
       checkedOutItems.value.push(selectedItemID.value);
       transactions.value.push({ ...details.transactionDetails.data });
       selectedItemID.value = null;
