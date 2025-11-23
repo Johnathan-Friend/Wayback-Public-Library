@@ -188,7 +188,7 @@ async function loadReservations() {
 
 async function loadItems() {
   try {
-    const itemResults = await api.getAvailableItemsForCheckout();
+    const itemResults = await api.getAllItems();
     const reservedItemIDs = new Set(
       allReservations.value.map(reservation => reservation.ItemID)
     );
