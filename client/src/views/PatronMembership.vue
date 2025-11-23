@@ -170,9 +170,9 @@ const newPatronFirstName = ref('')
 const newPatronLastName = ref('')
 const newPatronError = ref(null)
 
-onMounted(() => {
-  loadPatrons()
-})
+onMounted(async () => {
+  await loadPatrons()
+});
 
 async function loadPatrons() {
   try {
