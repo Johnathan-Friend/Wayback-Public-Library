@@ -14,15 +14,31 @@
                 variant="elevated"
                 title="Error"
             ></v-alert>   
-          
-            <!-- TODO: Need to add inputs to create a reservation -->
-
+            <v-autocomplete
+              label="Search Members"
+              :items="patrons"
+              :item-title="formatPatronTitle"
+              item-value="PatronID"
+              v-model="selectedPatronID"
+              variant="outlined"
+              density="comfortable"
+              class="pt-6"
+            />
+            <v-autocomplete
+              label="Search Item ID"
+              :items="items"
+              item-title="ItemID"
+              item-value="ItemID"
+              v-model="selectedItemID"
+              variant="outlined"
+              density="comfortable"
+            />
           <v-card-actions>
             <v-btn
               color="primary"
               variant="elevated"
               @click="addReservationEntry"
-              :disabled="!selectedSearchValue"
+              :disabled="!selectedPatronID || !selectedItemID"
             >
               Create Reservation
             </v-btn>
@@ -98,6 +114,10 @@ import { useRouter } from "vue-router"
 import api from '../api/api'
 
 const router = useRouter();
+const items = ref([]);
+const patrons = ref([]);
+const selectedItemID = ref(null);
+const selectedPatronID = ref(null);
 const selectedFilter = ref('reservation');
 const searchQuery = ref('');
 const selectedSearchValue = ref(null);
@@ -132,6 +152,10 @@ const reservations = computed(() => {
     .map(formatReservation);
 });
 
+const formatPatronTitle = (patron) => {
+  return `${patron.FirstName} ${patron.LastName} (${patron.PatronID})`
+}
+
 function formatReservation(reservation) {
   return {
     id: reservation.ReservationID,
@@ -144,30 +168,98 @@ function formatReservation(reservation) {
 async function loadReservations() {
   try {
     tableError.value = null;
-    allReservations.value = await api.getAllReservations();
+    const reservations = await api.getAllReservations();
+    const nonPickedUpReservations = reservations.filter(reservation => reservation.PickupDate === null || reservation.PickupDate === undefined || reservation.PickupDate === '');
+    const today = new Date().toISOString().split('T')[0];
+    for (const reservation of nonPickedUpReservations) {
+      if (reservation.ReservationExpirationDate < today) {
+        await performDeletion(reservation.ReservationID, false);
+      }
+    }
+    allReservations.value = reservations.filter(reservation =>
+      !reservation.PickupDate &&
+      reservation.ReservationExpirationDate >= today
+    );
   } catch (error) {
     console.error("Failed to load reservations:", error);
     tableError.value = error.response?.data?.detail || 'Failed to load reservations';
   }
 }
 
-function addReservationEntry() {
-  reservations.value.push({
-    id: Date.now(),
-    label: "Example Reservation Entry",
-    details: "Details go here"
-  })
+async function loadItems() {
+  try {
+    const itemResults = await api.getAllItems();
+    const reservedItemIDs = new Set(
+      allReservations.value.map(reservation => reservation.ItemID)
+    );
+    items.value = itemResults.filter(item => !reservedItemIDs.has(item.ItemID));
+  } catch (err) {
+    console.error("Failed to load items:", err);
+  }
+}
+
+async function loadPatrons() {
+  try {
+    patrons.value = await api.getAllPatrons();
+  } catch (err) {
+    console.error("Failed to load patrons:", err);
+  }
+}
+
+async function addReservationEntry() {
+  if (!selectedPatronID.value || !selectedItemID.value) {
+    leftPanelError.value = "Please select both a patron and an item.";
+    return;
+  }
+
+  leftPanelError.value = null;
+
+  //EJ: 1st need to add check here to see if the item is already checked out. Can do this looking at status on item 
+  // if item is checked out, make reservation date null and expiration date null when creating reservation
+  // else (item is available), make reservation same as it is done below
+
+  const reservationDate = calculateReservationDate();
+  const expirationDate = calculateExpirationDate(reservationDate);
+  
+  try {
+    await api.createReservation(selectedItemID.value, selectedPatronID.value, reservationDate, expirationDate);
+  } catch (error) {
+    console.error("Failed to create reservation:", error);
+    leftPanelError.value = error.response?.data?.detail || 'Failed to create reservation';
+    return;
+  }
+  
+  await loadReservations();
+  await loadItems();
+  selectedPatronID.value = null;
+  selectedItemID.value = null;
+}
+
+function calculateReservationDate() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function calculateExpirationDate(reservationStartDate) {
+  const date = new Date(reservationStartDate);
+  date.setDate(date.getDate() + 5);
+  return date.toISOString().split('T')[0];
 }
 
 async function deleteReservation(item) {
   if (!confirm(`Are you sure you want to delete reservation ${item.id}?`)) {
     return;
   }
-  
+  await performDeletion(item.reservationId);
+}
+
+async function performDeletion(reservationID, shouldLoadReservations = true) {
   try {
     tableError.value = null;
-    await api.deleteReservation(item.reservationId);
-    await loadReservations();
+    await api.deleteReservation(reservationID);
+    if (shouldLoadReservations) {
+      await loadReservations();
+      await loadItems();
+    }
   } catch (error) {
     console.error("Failed to delete reservation:", error);
     tableError.value = error.response?.data?.detail || 'Failed to delete reservation';
@@ -178,8 +270,10 @@ function goBack() {
   router.push("/")
 }
 
-onMounted(() => {
-  loadReservations();
+onMounted(async () => {
+  await loadReservations();
+  loadItems();
+  loadPatrons();
 });
 </script>
 
