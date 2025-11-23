@@ -213,6 +213,11 @@ async function addReservationEntry() {
   }
 
   leftPanelError.value = null;
+
+  //EJ: 1st need to add check here to see if the item is already checked out. Can do this looking at status on item 
+  // if item is checked out, make reservation date null and expiration date null when creating reservation
+  // else (item is available), make reservation same as it is done below
+
   const reservationDate = calculateReservationDate();
   const expirationDate = calculateExpirationDate(reservationDate);
   
