@@ -233,7 +233,8 @@ def checkout_item(db: Session, patron_id: int, item_id: int):
             "patron_id": patron.PatronID,
             "item_id": item.ItemID,
             "date_due": new_transaction.DateDue.isoformat(),
-            "item_status": getattr(item, "Status", None)
+            "item_status": getattr(item, "Status", None),
+            "rental_length": rental_length,
         }
 
     except SQLAlchemyError as e:
