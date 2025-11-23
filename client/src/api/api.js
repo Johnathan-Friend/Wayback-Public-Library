@@ -206,6 +206,41 @@ const api = {
       }
   },
 
+  async updateItemDetails(itemId, isbn, branchId, currentBranchId, isDamaged, status) {
+      try {
+          const response = await apiClient.patch(`items/${itemId}`, {
+              ISBN: isbn,
+              BranchID: branchId,
+              CurrentBranchID: currentBranchId,
+              IsDamaged: isDamaged,
+              Status: status
+          });
+          return response.data;
+      } catch (error) {
+          throw error;
+      }
+  },
+
+  async updateReservation(reservationID, itemID, patronID, ReservationDate, ReservationExpirationDate, PickupDate) {
+    try {
+      const response = await apiClient.patch(`reservations/${reservationID}`,
+        {
+          ItemID: itemID,
+          PatronID: patronID,
+          ReservationDate: ReservationDate,
+          ReservationExpirationDate: ReservationExpirationDate,
+          PickupDate: PickupDate
+        },
+      )
+      return { data: response.data, status: 200 }
+    } catch (error) {
+      if (error.status === 400 && error.response?.data?.detail) {
+        return { data: error.response?.data?.detail, status: 400 }
+      }
+      throw error
+    }
+  },
+
   //DELETE requests
   async deleteTransaction(transactionID) {
       try {
