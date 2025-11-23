@@ -177,6 +177,18 @@ const api = {
         }
     },
 
+    async updateReservation(reservationId, updateData) {
+      try {
+        const response = await apiClient.patch(
+          `reservations/${reservationId}`,
+          updateData
+        );
+        return response.data;
+      } catch (error) {
+        throw error;
+      }
+    },
+
     //DELETE requests
     async deleteTransaction(transactionID) {
         try {

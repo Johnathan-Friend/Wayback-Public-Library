@@ -205,6 +205,37 @@ async function confirmCheckIn() {
     finesDisplay.value = response.FeeCharged;
     errorMessage.value = '';
     selectedItemID.value = null;
+
+    if (response.ItemStatus === 'Reserved') {
+      
+        // Build dates
+        const today = new Date();
+        const expiration = new Date();
+        expiration.setDate(expiration.getDate() + 5);
+
+        const todayFormatted = today.toISOString().split('T')[0];
+        const expirationFormatted = expiration.toISOString().split('T')[0];
+
+        const updateData = {
+        ItemID: response.ItemID,
+        PatronID: response.PatronID,
+        ReservationDate: response.DateCheckedOut,
+        ReservationExpirationDate: expirationFormatted,
+        PickupDate: todayFormatted
+      };
+
+      try {
+        await api.updateReservation(reservationId, updateData);
+        console.log('Reservation updated — 5-day pickup window started.');
+        alert('updated reservation'); 
+      } catch (e) {
+        alert('Failed to update reservation'); 
+        console.error('Failed to update reservation:', e);
+      }
+    
+
+       
+    }
   } catch (err) {
     errorMessage.value = err.response?.data?.detail || 'Failed to check in item';
     successMessage.value = '';
