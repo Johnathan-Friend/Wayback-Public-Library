@@ -115,7 +115,7 @@ const errorMessage = ref('');
 
 async function loadItems() {
   try {
-    items.value = await api.getAllItems();
+    items.value = await api.getAvailableItemsForCheckIn();
   } catch (err) {
     console.error("Failed to load items:", err);
   }
@@ -197,9 +197,15 @@ async function confirmCheckIn() {
     return;
   }
 
+  //EJ: 2nd add loading state for reservation as done in reservations and checkout views
+  // if item is in reservation table, and does not have a pickup date, this means that the item is reserved but not picked up yet
+  // so if it has a reservation like that, we need to then update the reservation to have the start date, end date (start date + 5) 
+  // the pickup date logic is in the check out view so don't add that here
+
   try {
     const returnDateFormatted = returnDate.value.toISOString().split('T')[0];
     const response = await api.checkInItem(member.value, selectedItemID.value, returnDateFormatted);
+    items.value = items.value.filter(item => item.ItemID !== selectedItemID.value);
     successMessage.value = `Successfully returned: ${title.value} for ${response.PatronName}`;
     daysLateDisplay.value = response.DaysLate;
     finesDisplay.value = response.FeeCharged;
@@ -215,8 +221,8 @@ function goToHome() {
   router.push('/');
 }
 
-onMounted(() => {
-  loadItems();
+onMounted(async () => {
+  await loadItems();
 });
 
 </script>
