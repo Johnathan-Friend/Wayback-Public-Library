@@ -234,7 +234,7 @@
 
 <script setup>
 import api from '../api/api'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router';
 import { mdiCheck, mdiDelete } from '@mdi/js'
 
@@ -283,15 +283,57 @@ const transactions = ref([]);
 const transactionTableError = ref(null);
 const showExtendMembership = ref(false);
 const showPayFeeBalance = ref(false);
+const allReservations = ref([]);
 
-onMounted(() => {
-  loadItems();
-  loadPatrons();
+onMounted(async () => {
+  await loadPatrons();
 });
+
+watch(isPatronSelected, async (newValue) => {
+  if (newValue === true) {
+    await loadReservations();
+    await loadItems();
+  }
+});
+
+async function loadReservations() {
+  try {
+    const reservations = await api.getAllReservations();
+    const nonPickedUpReservations = reservations.filter(reservation => reservation.PickupDate === null || reservation.PickupDate === undefined || reservation.PickupDate === '');
+    const today = new Date().toISOString().split('T')[0];
+    for (const reservation of nonPickedUpReservations) {
+      if (reservation.ReservationExpirationDate < today) {
+        await performDeletion(reservation.ReservationID, false);
+      }
+    }
+    allReservations.value = reservations.filter(reservation =>
+      !reservation.PickupDate &&
+      reservation.ReservationExpirationDate >= today
+    );
+  } catch (error) {
+    console.error("Failed to load reservations:", error);
+  }
+}
 
 async function loadItems() {
   try {
-    items.value = await api.getAvailableItemsForCheckout();
+    const itemResults = await api.getAvailableItemsForCheckout();
+    console.log(itemResults);
+    const thisPatronReservations = allReservations.value.filter(
+      r => r.PatronID === selectedPatronID.value
+    );
+    const otherPatronReservations = allReservations.value.filter(
+      r => r.PatronID !== selectedPatronID.value
+    );
+    const thisPatronItemIDs = new Set(thisPatronReservations.map(r => r.ItemID));
+    const otherPatronItemIDs = new Set(otherPatronReservations.map(r => r.ItemID));
+    items.value = itemResults
+      .filter(item => !otherPatronItemIDs.has(item.ItemID))
+      .map(item => ({
+        ...item,
+        isReservationItem: thisPatronItemIDs.has(item.ItemID)
+      }));
+    console.log(items.value);
   } catch (err) {
     console.error("Failed to load items:", err);
   }
@@ -472,6 +514,17 @@ async function extendMembership() {
     checkPatronCheckoutStatus();
   } catch(error) {
     console.error(error);
+  }
+}
+
+async function performDeletion(reservationID, shouldLoadReservations = true) {
+  try {
+    await api.deleteReservation(reservationID);
+    if (shouldLoadReservations) {
+      await loadReservations();
+    }
+  } catch (error) {
+    console.error("Failed to delete reservation:", error);
   }
 }
 

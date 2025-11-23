@@ -215,8 +215,8 @@ function goToHome() {
   router.push('/');
 }
 
-onMounted(() => {
-  loadItems();
+onMounted(async () => {
+  await loadItems();
 });
 
 </script>
