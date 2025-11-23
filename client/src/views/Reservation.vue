@@ -14,15 +14,31 @@
                 variant="elevated"
                 title="Error"
             ></v-alert>   
-          
-            <!-- TODO: Need to add inputs to create a reservation -->
-
+            <v-autocomplete
+              label="Search Members"
+              :items="patrons"
+              :item-title="formatPatronTitle"
+              item-value="PatronID"
+              v-model="selectedPatronID"
+              variant="outlined"
+              density="comfortable"
+              class="pt-6"
+            />
+            <v-autocomplete
+              label="Search Item ID"
+              :items="items"
+              item-title="ItemID"
+              item-value="ItemID"
+              v-model="selectedItemID"
+              variant="outlined"
+              density="comfortable"
+            />
           <v-card-actions>
             <v-btn
               color="primary"
               variant="elevated"
               @click="addReservationEntry"
-              :disabled="!selectedSearchValue"
+              :disabled="!selectedPatronID || !selectedItemID"
             >
               Create Reservation
             </v-btn>
@@ -38,7 +54,6 @@
                 variant="outlined"
                 density="comfortable"
                 clearable
-                @input="fetchDetails"
                 />
             </v-col>
             <v-col cols="12" md="4">
@@ -52,7 +67,6 @@
                 v-model="selectedFilter"
                 variant="outlined"
                 density="comfortable"
-                @update:modelValue="fetchDetails"
                 />
             </v-col>
         </v-row>
@@ -94,44 +108,191 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref, computed, onMounted } from "vue"
 import { mdiDelete } from "@mdi/js"
 import { useRouter } from "vue-router"
+import api from '../api/api'
 
 const router = useRouter();
+const items = ref([]);
+const patrons = ref([]);
+const selectedItemID = ref(null);
+const selectedPatronID = ref(null);
 const selectedFilter = ref('reservation');
 const searchQuery = ref('');
 const selectedSearchValue = ref(null);
 const leftPanelError = ref(null);
-const reservations = ref([]);
+const allReservations = ref([]);
 const tableError = ref(null);
 
-const reservationHeaders = [{ title: "Reservation ID", key: "id" },{ title: "Name/Item", key: "label" },{ title: "Details", key: "details" },{ title: "Actions", key: "actions", sortable: false }];
+const reservationHeaders = [
+  { title: "Reservation ID", key: "id" },
+  { title: "Name/Item", key: "label" },
+  { title: "Details", key: "details" },
+  { title: "Actions", key: "actions", sortable: false }
+];
 
-// Placeholder: will need to be replaced by real lookup API
-async function fetchDetails() {
-  // Example call — adjust to your API needs
-  await api.search({
-    filter: selectedFilter.value,
-    query: searchQuery.value
-  });
+const reservations = computed(() => {
+  if (!searchQuery.value || !searchQuery.value.trim()) {
+    return allReservations.value.map(formatReservation);
+  }
+
+  const query = searchQuery.value.trim();
+  return allReservations.value
+    .filter(reservation => {
+      if (selectedFilter.value === 'reservation') {
+        return reservation.ReservationID.toString().includes(query);
+      } else if (selectedFilter.value === 'patron') {
+        return reservation.PatronID.toString().includes(query);
+      } else if (selectedFilter.value === 'item') {
+        return reservation.ItemID.toString().includes(query);
+      }
+      return true;
+    })
+    .map(formatReservation);
+});
+
+const formatPatronTitle = (patron) => {
+  return `${patron.FirstName} ${patron.LastName} (${patron.PatronID})`
 }
 
-function addReservationEntry() {
-  reservations.value.push({
-    id: Date.now(),
-    label: "Example Reservation Entry",
-    details: "Details go here"
-  })
+function formatReservation(reservation) {
+  return {
+    id: reservation.ReservationID,
+    label: `Patron ${reservation.PatronID} / Item ${reservation.ItemID}`,
+    details: `Reserved: ${reservation.ReservationDate || 'N/A'} | Expires: ${reservation.ReservationExpirationDate || 'N/A'}`,
+    reservationId: reservation.ReservationID
+  };
 }
 
-function deleteReservation(item) {
-  reservations.value = reservations.value.filter(r => r.id !== item.id)
+async function loadReservations() {
+  try {
+    tableError.value = null;
+    const reservations = await api.getAllReservations();
+    const nonPickedUpReservations = reservations.filter(reservation => reservation.PickupDate === null || reservation.PickupDate === undefined || reservation.PickupDate === '');
+    const today = new Date().toISOString().split('T')[0];
+    for (const reservation of nonPickedUpReservations) {
+      if (reservation.ReservationExpirationDate < today) {
+        await performDeletion(reservation.ReservationID, false);
+      }
+    }
+    allReservations.value = reservations.filter(reservation =>
+      !reservation.PickupDate &&
+      reservation.ReservationExpirationDate >= today
+    );
+  } catch (error) {
+    console.error("Failed to load reservations:", error);
+    tableError.value = error.response?.data?.detail || 'Failed to load reservations';
+  }
+}
+
+async function loadItems() {
+  try {
+    const itemResults = await api.getAllItems();
+    const reservedItemIDs = new Set(
+      allReservations.value.map(reservation => reservation.ItemID)
+    );
+    items.value = itemResults.filter(item => !reservedItemIDs.has(item.ItemID));
+  } catch (err) {
+    console.error("Failed to load items:", err);
+  }
+}
+
+async function loadPatrons() {
+  try {
+    patrons.value = await api.getAllPatrons();
+  } catch (err) {
+    console.error("Failed to load patrons:", err);
+  }
+}
+
+async function addReservationEntry() {
+  if (!selectedPatronID.value || !selectedItemID.value) {
+    leftPanelError.value = "Please select both a patron and an item.";
+    return;
+  }
+
+  leftPanelError.value = null;
+
+  let itemStatus = null;
+
+  try {
+    const itemDetails = await api.getItemDetailsById(selectedItemID.value);
+    itemStatus = itemDetails.Status;   // e.g., "CheckedOut" or "Available" or "Reserved"
+  } catch (error) {
+    console.error("Failed to fetch item status:", error);
+    leftPanelError.value = "Could not verify item status.";
+    return;
+  }
+
+  let reservationDate = null;
+  let expirationDate = null;
+
+  
+  if (itemStatus === "CheckedOut") {
+    reservationDate = null;
+    expirationDate = null;
+  }
+  
+  else {
+    reservationDate = calculateReservationDate();
+    expirationDate = calculateExpirationDate(reservationDate);
+  }
+  
+  try {
+    await api.createReservation(selectedItemID.value, selectedPatronID.value, reservationDate, expirationDate);
+  } catch (error) {
+    console.error("Failed to create reservation:", error);
+    leftPanelError.value = error.response?.data?.detail || 'Failed to create reservation';
+    return;
+  }
+  
+  await loadReservations();
+  await loadItems();
+  selectedPatronID.value = null;
+  selectedItemID.value = null;
+}
+
+function calculateReservationDate() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function calculateExpirationDate(reservationStartDate) {
+  const date = new Date(reservationStartDate);
+  date.setDate(date.getDate() + 5);
+  return date.toISOString().split('T')[0];
+}
+
+async function deleteReservation(item) {
+  if (!confirm(`Are you sure you want to delete reservation ${item.id}?`)) {
+    return;
+  }
+  await performDeletion(item.reservationId);
+}
+
+async function performDeletion(reservationID, shouldLoadReservations = true) {
+  try {
+    tableError.value = null;
+    await api.deleteReservation(reservationID);
+    if (shouldLoadReservations) {
+      await loadReservations();
+      await loadItems();
+    }
+  } catch (error) {
+    console.error("Failed to delete reservation:", error);
+    tableError.value = error.response?.data?.detail || 'Failed to delete reservation';
+  }
 }
 
 function goBack() {
   router.push("/")
 }
+
+onMounted(async () => {
+  await loadReservations();
+  loadItems();
+  loadPatrons();
+});
 </script>
 
 <style scoped>

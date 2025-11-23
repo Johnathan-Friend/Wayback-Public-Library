@@ -115,7 +115,7 @@ const errorMessage = ref('');
 
 async function loadItems() {
   try {
-    items.value = await api.getAllItems();
+    items.value = await api.getAvailableItemsForCheckIn();
   } catch (err) {
     console.error("Failed to load items:", err);
   }
@@ -197,57 +197,75 @@ async function confirmCheckIn() {
     return;
   }
 
+  //EJ: 2nd add loading state for reservation as done in reservations and checkout views
+  // if item is in reservation table, and does not have a pickup date, this means that the item is reserved but not picked up yet
+  // so if it has a reservation like that, we need to then update the reservation to have the start date, end date (start date + 5) 
+  // the pickup date logic is in the check out view so don't add that here
+
   try {
     const returnDateFormatted = returnDate.value.toISOString().split('T')[0];
-    const response = await api.checkInItem(member.value, selectedItemID.value, returnDateFormatted);
+    const response = await api.checkInItem(
+      member.value,
+      selectedItemID.value,
+      returnDateFormatted
+    );
+
+    items.value = items.value.filter(item => item.ItemID !== selectedItemID.value);
     successMessage.value = `Successfully returned: ${title.value} for ${response.PatronName}`;
     daysLateDisplay.value = response.DaysLate;
     finesDisplay.value = response.FeeCharged;
     errorMessage.value = '';
-    selectedItemID.value = null;
 
     if (response.ItemStatus === 'Reserved') {
-      
-        // Build dates
-        const today = new Date();
-        const expiration = new Date();
-        expiration.setDate(expiration.getDate() + 5);
-
-        const todayFormatted = today.toISOString().split('T')[0];
-        const expirationFormatted = expiration.toISOString().split('T')[0];
-
-        const updateData = {
-        ItemID: response.ItemID,
-        PatronID: response.PatronID,
-        ReservationDate: response.DateCheckedOut,
-        ReservationExpirationDate: expirationFormatted,
-        PickupDate: todayFormatted
-      };
-
       try {
-        await api.updateReservation(reservationId, updateData);
-        console.log('Reservation updated — 5-day pickup window started.');
-        alert('updated reservation'); 
-      } catch (e) {
-        alert('Failed to update reservation'); 
-        console.error('Failed to update reservation:', e);
-      }
-    
+        const allReservations = await api.getAllReservations();
+        const reservation = allReservations.find(r => r.ItemID === response.ItemID &&
+          (r.PickupDate === null || r.PickupDate === undefined || r.PickupDate === '')
+        );
 
-       
+        if (reservation) {
+          const today = new Date();
+          const expiration = new Date();
+          expiration.setDate(expiration.getDate() + 5);
+
+          const startDateFormatted = today.toISOString().split('T')[0];
+          const expirationFormatted = expiration.toISOString().split('T')[0];
+
+          const updateData = {
+            ItemID: reservation.ItemID,
+            PatronID: reservation.PatronID,
+            ReservationDate: startDateFormatted,
+            ReservationExpirationDate: expirationFormatted,
+            PickupDate: reservation.PickupDate
+          };
+
+          await api.updateReservation(reservation.ReservationID, updateData);
+          console.log('Reservation updated: 5-day pickup window started.');
+          alert(`Item is reserved. Reservation started for Patron ${reservation.PatronID}. They have 5 days to pick up the item.`);
+        } else {
+          console.log('Item marked Reserved, but no matching reservation found.');
+        }
+      } catch (e) {
+        console.error('Failed to process reservation for this item:', e);
+      }
     }
+    selectedItemID.value = null;
+
   } catch (err) {
     errorMessage.value = err.response?.data?.detail || 'Failed to check in item';
     successMessage.value = '';
   }
+
+
+
 }
 
 function goToHome() {
   router.push('/');
 }
 
-onMounted(() => {
-  loadItems();
+onMounted(async () => {
+  await loadItems();
 });
 
 </script>
