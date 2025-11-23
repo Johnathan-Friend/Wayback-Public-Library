@@ -219,6 +219,25 @@ const api = {
         } catch (error) {
             throw error;
         }
+    },
+
+    // Reservation management
+    async getAllReservations() {
+        try {
+            const response = await apiClient.get('reservations/');
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async deleteReservation(reservationId) {
+        try {
+            const response = await apiClient.delete(`reservations/${reservationId}`);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
     }
 }
 
