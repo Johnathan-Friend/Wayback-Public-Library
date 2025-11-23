@@ -28,6 +28,15 @@ const api = {
     }
   },
 
+  async getAvailableItemsForCheckIn() {
+    try {
+      const response = await apiClient.get('items/checked-out/');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   async getItemDetails(itemDetailsId) {
     try {
       const response = await apiClient.get(`item-details/${itemDetailsId}`)

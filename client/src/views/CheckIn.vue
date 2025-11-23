@@ -115,7 +115,7 @@ const errorMessage = ref('');
 
 async function loadItems() {
   try {
-    items.value = await api.getAllItems();
+    items.value = await api.getAvailableItemsForCheckIn();
   } catch (err) {
     console.error("Failed to load items:", err);
   }
@@ -200,6 +200,7 @@ async function confirmCheckIn() {
   try {
     const returnDateFormatted = returnDate.value.toISOString().split('T')[0];
     const response = await api.checkInItem(member.value, selectedItemID.value, returnDateFormatted);
+    items.value = items.value.filter(item => item.ItemID !== selectedItemID.value);
     successMessage.value = `Successfully returned: ${title.value} for ${response.PatronName}`;
     daysLateDisplay.value = response.DaysLate;
     finesDisplay.value = response.FeeCharged;
